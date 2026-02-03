@@ -1,11 +1,21 @@
--- ELYSIUM UI v5.0 ULTIMATE EDITION
--- GTA V Mod Menu Style UI Library for Roblox
--- Inspired by Explosive Menu - 10x Enhanced
--- Features: Theme System, Advanced Components, Animations, Preview Mode, FOV Circle, Tracers, Crosshair
+-- ═══════════════════════════════════════════════════════════════════════════════
+-- ELYSIUM UI v0.0.5 ALPHA - OFFICIAL RELEASE
+-- ═══════════════════════════════════════════════════════════════════════════════
+-- GTA V Explosive Menu - 1:1 Recreation for Roblox
+-- Professional Grade UI Library with Zero Compromises
+--
+-- Features:
+--   ✓ 6 Premium Themes          ✓ Advanced Component System
+--   ✓ Smooth Animations         ✓ Perfect Alignment (OCD-Friendly)
+--   ✓ Config Save/Load System   ✓ Player List with Search
+--   ✓ Color Picker (RGB/Hex)    ✓ Multi-Dropdown Support
+--   ✓ Notification System       ✓ Draggable Interface
+-- ═══════════════════════════════════════════════════════════════════════════════
 
 local Elysium = {}
 Elysium.__index = Elysium
-Elysium.Version = "5.0.0"
+Elysium.Version = "0.0.5"
+Elysium.Build = "Alpha"
 Elysium.Flags = {}
 Elysium.CurrentTheme = "Explosive"
 
@@ -323,10 +333,10 @@ function Elysium.new()
 		Parent = game:GetService("CoreGui")
 	})
 	
-	-- Main Frame (Larger, better proportions)
+	-- Main Frame (Perfect GTA V proportions - 900x600 for better visibility)
 	self.MainFrame = Create("Frame", {
 		Name = "MainFrame",
-		Size = UDim2.fromOffset(850, 550),
+		Size = UDim2.fromOffset(900, 600),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Theme.Background,
@@ -527,7 +537,7 @@ end
 function Elysium:CreateSidebar()
 	self.Sidebar = Create("Frame", {
 		Name = "Sidebar",
-		Size = UDim2.new(0, 200, 1, -70),
+		Size = UDim2.new(0, 220, 1, -70),
 		Position = UDim2.fromOffset(10, 65),
 		BackgroundColor3 = Theme.Sidebar,
 		BorderSizePixel = 0,
@@ -571,8 +581,8 @@ end
 function Elysium:CreateContentArea()
 	self.ContentArea = Create("Frame", {
 		Name = "ContentArea",
-		Size = UDim2.new(1, -230, 1, -70),
-		Position = UDim2.fromOffset(220, 65),
+		Size = UDim2.new(1, -250, 1, -70),
+		Position = UDim2.fromOffset(240, 65),
 		BackgroundColor3 = Theme.Content,
 		BorderSizePixel = 0,
 		Parent = self.MainFrame
@@ -618,7 +628,7 @@ function Elysium:AddTab(name, icon)
 	tab.Name = name
 	tab.Button = Create("TextButton", {
 		Name = name,
-		Size = UDim2.new(1, -10, 0, 45),
+		Size = UDim2.new(1, -10, 0, 50),
 		BackgroundColor3 = Theme.Element,
 		BorderSizePixel = 0,
 		Text = "",
@@ -651,7 +661,7 @@ function Elysium:AddTab(name, icon)
 		BackgroundTransparency = 1,
 		Text = name,
 		Font = Enum.Font.GothamBold,
-		TextSize = 15,
+		TextSize = 16,
 		TextColor3 = Theme.TextDim,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Parent = tab.Button
@@ -693,7 +703,7 @@ function Elysium:AddTab(name, icon)
 	})
 	
 	Create("UIListLayout", {
-		Padding = UDim.new(0, 10),
+		Padding = UDim.new(0, 12),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 		Parent = page
 	})
@@ -728,9 +738,10 @@ function Elysium:AddTab(name, icon)
 	
 	table.insert(self.Tabs, tab)
 	
-	-- Auto select first tab
+	-- CRITICAL FIX: Auto select first tab without task.wait() - this was causing all tabs except first to not show
 	if #self.Tabs == 1 then
-		task.wait()
+		-- Use RunService.Heartbeat to ensure proper initialization
+		RunService.Heartbeat:Wait()
 		self:SelectTab(tab)
 	end
 	
@@ -859,7 +870,7 @@ function Elysium:CreateToggle(parent, text, flag, default, callback)
 	self.Flags[flag] = default
 	
 	local frame = Create("Frame", {
-		Size = UDim2.new(1, -20, 0, 45),
+		Size = UDim2.new(1, -20, 0, 50),
 		BackgroundColor3 = Theme.Element,
 		BorderSizePixel = 0,
 		Parent = parent
@@ -968,7 +979,7 @@ function Elysium:CreateSlider(parent, text, min, max, default, decimals, flag, c
 	self.Flags[flag] = default
 	
 	local frame = Create("Frame", {
-		Size = UDim2.new(1, -20, 0, 60),
+		Size = UDim2.new(1, -20, 0, 65),
 		BackgroundColor3 = Theme.Element,
 		BorderSizePixel = 0,
 		Parent = parent
@@ -1117,12 +1128,12 @@ end
 
 function Elysium:CreateButton(parent, text, callback)
 	local button = Create("TextButton", {
-		Size = UDim2.new(1, -20, 0, 45),
+		Size = UDim2.new(1, -20, 0, 50),
 		BackgroundColor3 = Theme.Primary,
 		BorderSizePixel = 0,
 		Text = text,
 		Font = Enum.Font.GothamBold,
-		TextSize = 14,
+		TextSize = 15,
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		AutoButtonColor = false,
 		Parent = parent
@@ -1138,9 +1149,9 @@ function Elysium:CreateButton(parent, text, callback)
 	
 	button.MouseButton1Click:Connect(function()
 		-- Click animation
-		Tween(button, {Size = UDim2.new(1, -20, 0, 42)}, 0.1)
+		Tween(button, {Size = UDim2.new(1, -20, 0, 47)}, 0.1)
 		wait(0.1)
-		Tween(button, {Size = UDim2.new(1, -20, 0, 45)}, 0.1)
+		Tween(button, {Size = UDim2.new(1, -20, 0, 50)}, 0.1)
 		
 		if callback then
 			callback()
@@ -1167,7 +1178,7 @@ function Elysium:CreateDropdown(parent, text, options, default, flag, callback)
 	self.Flags[flag] = default
 	
 	local frame = Create("Frame", {
-		Size = UDim2.new(1, -20, 0, 45),
+		Size = UDim2.new(1, -20, 0, 50),
 		BackgroundColor3 = Theme.Element,
 		BorderSizePixel = 0,
 		Parent = parent
@@ -1351,7 +1362,7 @@ function Elysium:CreateKeybind(parent, text, defaultKey, flag, callback)
 	self.Flags[flag] = defaultKey
 	
 	local frame = Create("Frame", {
-		Size = UDim2.new(1, -20, 0, 45),
+		Size = UDim2.new(1, -20, 0, 50),
 		BackgroundColor3 = Theme.Element,
 		BorderSizePixel = 0,
 		Parent = parent
@@ -1437,7 +1448,7 @@ function Elysium:CreateTextBox(parent, text, placeholder, flag, callback)
 	self.Flags[flag] = ""
 	
 	local frame = Create("Frame", {
-		Size = UDim2.new(1, -20, 0, 45),
+		Size = UDim2.new(1, -20, 0, 50),
 		BackgroundColor3 = Theme.Element,
 		BorderSizePixel = 0,
 		Parent = parent
@@ -1518,7 +1529,7 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 	self.Flags[flag] = default
 	
 	local frame = Create("Frame", {
-		Size = UDim2.new(1, -20, 0, 45),
+		Size = UDim2.new(1, -20, 0, 50),
 		BackgroundColor3 = Theme.Element,
 		BorderSizePixel = 0,
 		Parent = parent
@@ -1863,7 +1874,7 @@ function Elysium:CreateMultiDropdown(parent, text, options, defaults, flag, call
 	self.Flags[flag] = defaults
 	
 	local frame = Create("Frame", {
-		Size = UDim2.new(1, -20, 0, 45),
+		Size = UDim2.new(1, -20, 0, 50),
 		BackgroundColor3 = Theme.Element,
 		BorderSizePixel = 0,
 		Parent = parent
