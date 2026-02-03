@@ -1,0 +1,195 @@
+-- elysium esp v1
+
+local esp = {}
+esp.objects = {}
+esp.settings = {
+	enabled = false,
+	box = true,
+	name = true,
+	health = true,
+	distance = false,
+	max_distance = 3000,
+	color_enemy = Color3.fromRGB(255, 80, 80),
+	color_team = Color3.fromRGB(80, 160, 255),
+	thickness = 1
+}
+
+local services = {
+	players = game:GetService("Players"),
+	run = game:GetService("RunService"),
+	camera = workspace.CurrentCamera
+}
+
+local local_player = services.players.LocalPlayer
+
+local function new_line()
+	local l = Drawing.new("Line")
+	l.Visible = false
+	l.Thickness = esp.settings.thickness
+	return l
+end
+
+local function new_text()
+	local t = Drawing.new("Text")
+	t.Visible = false
+	t.Size = 13
+	t.Center = true
+	t.Outline = true
+	t.Font = 2
+	return t
+end
+
+local function get_character(player)
+	return player.Character
+end
+
+local function get_root(char)
+	return char and char:FindFirstChild("HumanoidRootPart")
+end
+
+local function get_humanoid(char)
+	return char and char:FindFirstChildOfClass("Humanoid")
+end
+
+local function on_team(player)
+	if not player.Team or not local_player.Team then
+		return false
+	end
+	return player.Team == local_player.Team
+end
+
+function esp.new(player)
+	if player == local_player then return end
+
+	local obj = {
+		player = player,
+		box = {
+			tl = new_line(),
+			tr = new_line(),
+			bl = new_line(),
+			br = new_line()
+		},
+		name = new_text(),
+		health = new_line()
+	}
+
+	esp.objects[player] = obj
+end
+
+function esp.remove(player)
+	local obj = esp.objects[player]
+	if not obj then return end
+
+	for _, line in pairs(obj.box) do
+		line:Remove()
+	end
+	obj.name:Remove()
+	obj.health:Remove()
+
+	esp.objects[player] = nil
+end
+
+function esp.update()
+	if not esp.settings.enabled then
+		for _, obj in pairs(esp.objects) do
+			for _, l in pairs(obj.box) do l.Visible = false end
+			obj.name.Visible = false
+			obj.health.Visible = false
+		end
+		return
+	end
+
+	for player, obj in pairs(esp.objects) do
+		local char = get_character(player)
+		local root = get_root(char)
+		local hum = get_humanoid(char)
+
+		if not char or not root or not hum or hum.Health <= 0 then
+			for _, l in pairs(obj.box) do l.Visible = false end
+			obj.name.Visible = false
+			obj.health.Visible = false
+			continue
+		end
+
+		local pos, on_screen = services.camera:WorldToViewportPoint(root.Position)
+		if not on_screen then
+			for _, l in pairs(obj.box) do l.Visible = false end
+			obj.name.Visible = false
+			obj.health.Visible = false
+			continue
+		end
+
+		local distance = (services.camera.CFrame.Position - root.Position).Magnitude
+		if distance > esp.settings.max_distance then
+			for _, l in pairs(obj.box) do l.Visible = false end
+			obj.name.Visible = false
+			obj.health.Visible = false
+			continue
+		end
+
+		local scale = math.clamp(1 / distance * 1000, 0.8, 2)
+		local size = Vector2.new(35, 50) * scale
+
+		local tl = Vector2.new(pos.X - size.X, pos.Y - size.Y)
+		local tr = Vector2.new(pos.X + size.X, pos.Y - size.Y)
+		local bl = Vector2.new(pos.X - size.X, pos.Y + size.Y)
+		local br = Vector2.new(pos.X + size.X, pos.Y + size.Y)
+
+		local color = on_team(player)
+			and esp.settings.color_team
+			or esp.settings.color_enemy
+
+		-- box
+		if esp.settings.box then
+			obj.box.tl.From = tl
+			obj.box.tl.To = tr
+
+			obj.box.tr.From = tr
+			obj.box.tr.To = br
+
+			obj.box.br.From = br
+			obj.box.br.To = bl
+
+			obj.box.bl.From = bl
+			obj.box.bl.To = tl
+
+			for _, l in pairs(obj.box) do
+				l.Color = color
+				l.Visible = true
+			end
+		end
+
+		-- name
+		if esp.settings.name then
+			obj.name.Text = player.Name
+			obj.name.Position = Vector2.new(pos.X, tl.Y - 14)
+			obj.name.Color = color
+			obj.name.Visible = true
+		end
+
+		-- health
+		if esp.settings.health then
+			local hp = hum.Health / hum.MaxHealth
+			obj.health.From = Vector2.new(tl.X - 4, bl.Y)
+			obj.health.To = Vector2.new(tl.X - 4, bl.Y - (bl.Y - tl.Y) * hp)
+			obj.health.Color = Color3.fromRGB(
+				255 - (hp * 255),
+				hp * 255,
+				0
+			)
+			obj.health.Visible = true
+		end
+	end
+end
+
+-- lifecycle
+for _, p in ipairs(services.players:GetPlayers()) do
+	esp.new(p)
+end
+
+services.players.PlayerAdded:Connect(esp.new)
+services.players.PlayerRemoving:Connect(esp.remove)
+
+services.run.RenderStepped:Connect(esp.update)
+
+return esp
