@@ -1,5 +1,13 @@
+-- ELYSIUM UI v5.0 ULTIMATE EDITION
+-- GTA V Mod Menu Style UI Library for Roblox
+-- Inspired by Explosive Menu - 10x Enhanced
+-- Features: Theme System, Advanced Components, Animations, Preview Mode, FOV Circle, Tracers, Crosshair
+
 local Elysium = {}
 Elysium.__index = Elysium
+Elysium.Version = "5.0.0"
+Elysium.Flags = {}
+Elysium.CurrentTheme = "Explosive"
 
 -- Services
 local Players = game:GetService("Players")
@@ -9,49 +17,222 @@ local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
--- Theme Configuration (Explosive Style)
-local Theme = {
-	Background = Color3.fromRGB(8, 8, 12),
-	Sidebar = Color3.fromRGB(12, 12, 18),
-	Content = Color3.fromRGB(16, 16, 24),
-	Element = Color3.fromRGB(24, 24, 36),
-	ElementHover = Color3.fromRGB(32, 32, 48),
-	ElementActive = Color3.fromRGB(40, 40, 60),
+-- ========================================
+-- THEME SYSTEM
+-- ========================================
+
+Elysium.Themes = {
+	Explosive = {
+		Name = "Explosive Pink",
+		Background = Color3.fromRGB(8, 8, 12),
+		Sidebar = Color3.fromRGB(12, 12, 18),
+		Content = Color3.fromRGB(16, 16, 24),
+		Element = Color3.fromRGB(24, 24, 36),
+		ElementHover = Color3.fromRGB(32, 32, 48),
+		ElementActive = Color3.fromRGB(40, 40, 60),
+		Primary = Color3.fromRGB(255, 0, 128),
+		Secondary = Color3.fromRGB(180, 0, 255),
+		Accent = Color3.fromRGB(255, 50, 150),
+		Success = Color3.fromRGB(76, 175, 80),
+		Warning = Color3.fromRGB(255, 152, 0),
+		Error = Color3.fromRGB(244, 67, 54),
+		Text = Color3.fromRGB(255, 255, 255),
+		TextDim = Color3.fromRGB(160, 160, 180),
+		TextDark = Color3.fromRGB(100, 100, 120),
+		HeaderGradient = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 128)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(180, 0, 255)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 0, 200))
+		})
+	},
 	
-	-- Pink/Purple Gradient Accents (The Explosive Look)
-	Primary = Color3.fromRGB(255, 0, 128),      -- Hot Pink
-	Secondary = Color3.fromRGB(180, 0, 255),    -- Purple
-	Accent = Color3.fromRGB(255, 50, 150),      -- Neon Pink
+	Midnight = {
+		Name = "Midnight Blue",
+		Background = Color3.fromRGB(10, 10, 20),
+		Sidebar = Color3.fromRGB(15, 15, 28),
+		Content = Color3.fromRGB(20, 20, 35),
+		Element = Color3.fromRGB(25, 25, 42),
+		ElementHover = Color3.fromRGB(30, 30, 50),
+		ElementActive = Color3.fromRGB(35, 35, 58),
+		Primary = Color3.fromRGB(64, 156, 255),
+		Secondary = Color3.fromRGB(41, 98, 255),
+		Accent = Color3.fromRGB(102, 187, 255),
+		Success = Color3.fromRGB(76, 175, 80),
+		Warning = Color3.fromRGB(255, 193, 7),
+		Error = Color3.fromRGB(244, 67, 54),
+		Text = Color3.fromRGB(240, 245, 255),
+		TextDim = Color3.fromRGB(170, 180, 200),
+		TextDark = Color3.fromRGB(110, 120, 140),
+		HeaderGradient = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(64, 156, 255)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(41, 98, 255)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 70, 200))
+		})
+	},
 	
-	Text = Color3.fromRGB(255, 255, 255),
-	TextDim = Color3.fromRGB(160, 160, 180),
-	TextDark = Color3.fromRGB(100, 100, 120),
+	Toxic = {
+		Name = "Toxic Green",
+		Background = Color3.fromRGB(8, 15, 8),
+		Sidebar = Color3.fromRGB(12, 20, 12),
+		Content = Color3.fromRGB(16, 25, 16),
+		Element = Color3.fromRGB(20, 32, 20),
+		ElementHover = Color3.fromRGB(24, 38, 24),
+		ElementActive = Color3.fromRGB(28, 44, 28),
+		Primary = Color3.fromRGB(57, 255, 20),
+		Secondary = Color3.fromRGB(124, 252, 0),
+		Accent = Color3.fromRGB(173, 255, 47),
+		Success = Color3.fromRGB(76, 175, 80),
+		Warning = Color3.fromRGB(255, 235, 59),
+		Error = Color3.fromRGB(244, 67, 54),
+		Text = Color3.fromRGB(240, 255, 240),
+		TextDim = Color3.fromRGB(180, 200, 180),
+		TextDark = Color3.fromRGB(120, 140, 120),
+		HeaderGradient = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(57, 255, 20)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(124, 252, 0)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 205, 50))
+		})
+	},
 	
-	Glow = Color3.fromRGB(255, 0, 128),
-	Border = Color3.fromRGB(40, 40, 60),
+	RedDevil = {
+		Name = "Red Devil",
+		Background = Color3.fromRGB(15, 8, 8),
+		Sidebar = Color3.fromRGB(20, 12, 12),
+		Content = Color3.fromRGB(25, 16, 16),
+		Element = Color3.fromRGB(32, 20, 20),
+		ElementHover = Color3.fromRGB(38, 24, 24),
+		ElementActive = Color3.fromRGB(44, 28, 28),
+		Primary = Color3.fromRGB(255, 30, 30),
+		Secondary = Color3.fromRGB(220, 20, 60),
+		Accent = Color3.fromRGB(255, 69, 0),
+		Success = Color3.fromRGB(76, 175, 80),
+		Warning = Color3.fromRGB(255, 193, 7),
+		Error = Color3.fromRGB(244, 67, 54),
+		Text = Color3.fromRGB(255, 240, 240),
+		TextDim = Color3.fromRGB(200, 180, 180),
+		TextDark = Color3.fromRGB(140, 120, 120),
+		HeaderGradient = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 30, 30)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 20, 60)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(178, 34, 34))
+		})
+	},
 	
-	-- Gradients
-	HeaderGradient = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 128)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(180, 0, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 0, 200))
-	}),
+	Cyberpunk = {
+		Name = "Cyberpunk",
+		Background = Color3.fromRGB(12, 8, 15),
+		Sidebar = Color3.fromRGB(18, 12, 22),
+		Content = Color3.fromRGB(24, 16, 30),
+		Element = Color3.fromRGB(30, 20, 38),
+		ElementHover = Color3.fromRGB(36, 24, 45),
+		ElementActive = Color3.fromRGB(42, 28, 52),
+		Primary = Color3.fromRGB(0, 255, 255),
+		Secondary = Color3.fromRGB(255, 0, 255),
+		Accent = Color3.fromRGB(138, 43, 226),
+		Success = Color3.fromRGB(0, 255, 127),
+		Warning = Color3.fromRGB(255, 215, 0),
+		Error = Color3.fromRGB(255, 20, 147),
+		Text = Color3.fromRGB(240, 240, 255),
+		TextDim = Color3.fromRGB(180, 180, 220),
+		TextDark = Color3.fromRGB(120, 120, 160),
+		HeaderGradient = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 255)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(138, 43, 226)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 255))
+		})
+	},
 	
-	CornerRadius = 4,
-	AnimationSpeed = 0.2
+	DarkMode = {
+		Name = "Pure Dark",
+		Background = Color3.fromRGB(5, 5, 5),
+		Sidebar = Color3.fromRGB(10, 10, 10),
+		Content = Color3.fromRGB(15, 15, 15),
+		Element = Color3.fromRGB(20, 20, 20),
+		ElementHover = Color3.fromRGB(25, 25, 25),
+		ElementActive = Color3.fromRGB(30, 30, 30),
+		Primary = Color3.fromRGB(200, 200, 200),
+		Secondary = Color3.fromRGB(150, 150, 150),
+		Accent = Color3.fromRGB(100, 100, 100),
+		Success = Color3.fromRGB(76, 175, 80),
+		Warning = Color3.fromRGB(255, 193, 7),
+		Error = Color3.fromRGB(244, 67, 54),
+		Text = Color3.fromRGB(240, 240, 240),
+		TextDim = Color3.fromRGB(180, 180, 180),
+		TextDark = Color3.fromRGB(120, 120, 120),
+		HeaderGradient = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 200, 200)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 150, 150)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 100, 100))
+		})
+	}
 }
 
--- Utility Functions
+local Theme = Elysium.Themes.Explosive
+
+function Elysium:SetTheme(themeName)
+	if self.Themes[themeName] then
+		Theme = self.Themes[themeName]
+		self.CurrentTheme = themeName
+		
+		-- Update all UI elements with new theme
+		if self.ScreenGui then
+			self:RefreshTheme()
+		end
+		
+		self:Notify("Theme", "Changed to " .. Theme.Name, "success", 2)
+		return true
+	end
+	return false
+end
+
+function Elysium:RefreshTheme()
+	-- Update main window colors
+	if self.MainFrame then
+		self.MainFrame.BackgroundColor3 = Theme.Background
+	end
+	if self.Sidebar then
+		self.Sidebar.BackgroundColor3 = Theme.Sidebar
+	end
+	if self.ContentArea then
+		self.ContentArea.BackgroundColor3 = Theme.Content
+	end
+	
+	-- Update all elements recursively
+	local function updateElement(element)
+		if element:IsA("Frame") and element.Name:find("Element") then
+			element.BackgroundColor3 = Theme.Element
+		elseif element:IsA("TextLabel") or element:IsA("TextButton") then
+			if element.Name:find("Title") or element.Name:find("Header") then
+				element.TextColor3 = Theme.Primary
+			else
+				element.TextColor3 = Theme.Text
+			end
+		end
+		
+		for _, child in ipairs(element:GetChildren()) do
+			updateElement(child)
+		end
+	end
+	
+	if self.ScreenGui then
+		updateElement(self.ScreenGui)
+	end
+end
+
+-- ========================================
+-- UTILITY FUNCTIONS
+-- ========================================
+
 local function Create(instanceType, properties)
 	local instance = Instance.new(instanceType)
-	for prop, value in pairs(properties or {}) do
-		instance[prop] = value
+	for property, value in pairs(properties) do
+		instance[property] = value
 	end
 	return instance
 end
 
 local function Tween(instance, properties, duration, style, direction)
-	duration = duration or Theme.AnimationSpeed
+	duration = duration or Theme.AnimationSpeed or 0.2
 	style = style or Enum.EasingStyle.Quad
 	direction = direction or Enum.EasingDirection.Out
 	
@@ -60,1019 +241,541 @@ local function Tween(instance, properties, duration, style, direction)
 	return tween
 end
 
-local function CreateGlow(parent, color, size)
-	size = size or 20
+local function CreateGradient(instance, gradient)
+	local gradientObj = Create("UIGradient", {
+		Color = gradient,
+		Parent = instance
+	})
+	return gradientObj
+end
+
+local function CreateGlow(instance, color, transparency)
+	transparency = transparency or 0.5
+	
 	local glow = Create("ImageLabel", {
 		Name = "Glow",
+		Size = UDim2.new(1, 30, 1, 30),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundTransparency = 1,
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.new(1, size * 2, 1, size * 2),
-		ZIndex = parent.ZIndex - 1,
-		Image = "rbxassetid://6015897843",
-		ImageColor3 = color or Theme.Glow,
-		ImageTransparency = 0.7,
-		ScaleType = Enum.ScaleType.Slice,
-		SliceCenter = Rect.new(49, 49, 450, 450),
-		Parent = parent
+		Image = "rbxassetid://5028857084",
+		ImageColor3 = color,
+		ImageTransparency = transparency,
+		ZIndex = instance.ZIndex - 1,
+		Parent = instance
 	})
+	
 	return glow
 end
 
-local function CreateGradient(parent, colorSequence, rotation)
-	local gradient = Create("UIGradient", {
-		Color = colorSequence or Theme.HeaderGradient,
-		Rotation = rotation or 0,
+local function CreateStroke(instance, color, thickness)
+	local stroke = Create("UIStroke", {
+		Color = color or Theme.Primary,
+		Thickness = thickness or 1,
+		Transparency = 0.3,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Parent = instance
+	})
+	return stroke
+end
+
+local function CreateParticle(parent, color)
+	local particle = Create("Frame", {
+		Size = UDim2.fromOffset(4, 4),
+		BackgroundColor3 = color or Theme.Primary,
+		BorderSizePixel = 0,
+		Position = UDim2.new(math.random(), 0, math.random(), 0),
+		ZIndex = 10,
 		Parent = parent
 	})
-	return gradient
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(1, 0),
+		Parent = particle
+	})
+	
+	-- Animate
+	local tween = Tween(particle, {
+		Position = UDim2.new(math.random(), 0, math.random(), 0),
+		BackgroundTransparency = 1
+	}, 2, Enum.EasingStyle.Linear)
+	
+	tween.Completed:Connect(function()
+		particle:Destroy()
+	end)
 end
 
--- Main UI Constructor
+-- ========================================
+-- MAIN WINDOW CREATION
+-- ========================================
+
 function Elysium.new()
 	local self = setmetatable({}, Elysium)
-	
 	self.Flags = {}
 	self.Tabs = {}
-	self.CurrentTab = nil
-	self.Open = false
-	self.ScreenGui = nil
-	self.MainFrame = nil
+	self.Notifications = {}
 	
-	self:Initialize()
-	return self
-end
-
-function Elysium:Initialize()
-	-- ScreenGui
+	-- Create ScreenGui
 	self.ScreenGui = Create("ScreenGui", {
 		Name = "ElysiumUI",
 		ResetOnSpawn = false,
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-		Parent = LocalPlayer:WaitForChild("PlayerGui")
+		Parent = game:GetService("CoreGui")
 	})
 	
-	-- Main Container
+	-- Main Frame (Larger, better proportions)
 	self.MainFrame = Create("Frame", {
-		Name = "Main",
-		Size = UDim2.fromOffset(900, 600),
+		Name = "MainFrame",
+		Size = UDim2.fromOffset(850, 550),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Theme.Background,
 		BorderSizePixel = 0,
-		Visible = false,
 		ClipsDescendants = true,
+		Visible = true,
 		Parent = self.ScreenGui
 	})
 	
 	Create("UICorner", {
-		CornerRadius = UDim.new(0, Theme.CornerRadius),
+		CornerRadius = UDim.new(0, 8),
 		Parent = self.MainFrame
 	})
 	
-	-- Main Glow
-	CreateGlow(self.MainFrame, Theme.Primary, 30)
+	CreateGlow(self.MainFrame, Theme.Primary, 0.7)
+	CreateStroke(self.MainFrame, Theme.Primary, 2)
 	
-	-- Create Layout
+	-- Dragging functionality
+	self:MakeDraggable(self.MainFrame)
+	
+	-- Add particles effect
+	spawn(function()
+		while self.MainFrame and self.MainFrame.Parent do
+			if math.random() > 0.7 then
+				CreateParticle(self.MainFrame, Theme.Primary)
+			end
+			wait(0.5)
+		end
+	end)
+	
+	-- Create header
 	self:CreateHeader()
-	self:CreateSidebar()
-	self:CreateContentArea()
-	self:CreateTooltip()
-	self:SetupInput()
 	
-	-- Show initial
-	task.delay(0.5, function()
-		self:Toggle(true)
+	-- Create sidebar
+	self:CreateSidebar()
+	
+	-- Create content area
+	self:CreateContentArea()
+	
+	-- Create notification container
+	self:CreateNotificationContainer()
+	
+	-- Toggle keybind (INSERT)
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if not gameProcessed and input.KeyCode == Enum.KeyCode.Insert then
+			self.MainFrame.Visible = not self.MainFrame.Visible
+		end
+	end)
+	
+	return self
+end
+
+-- ========================================
+-- DRAGGABLE FUNCTIONALITY
+-- ========================================
+
+function Elysium:MakeDraggable(frame)
+	local dragging
+	local dragInput
+	local dragStart
+	local startPos
+	
+	local function update(input)
+		local delta = input.Position - dragStart
+		Tween(frame, {
+			Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		}, 0.1)
+	end
+	
+	frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = frame.Position
+			
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+	
+	frame.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
+	
+	UserInputService.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then
+			update(input)
+		end
 	end)
 end
+
+-- ========================================
+-- HEADER CREATION
+-- ========================================
 
 function Elysium:CreateHeader()
 	local header = Create("Frame", {
 		Name = "Header",
-		Size = UDim2.new(1, 0, 0, 50),
+		Size = UDim2.new(1, 0, 0, 60),
 		BackgroundColor3 = Theme.Sidebar,
 		BorderSizePixel = 0,
 		Parent = self.MainFrame
 	})
 	
-	-- Gradient Line
-	local gradientLine = Create("Frame", {
-		Size = UDim2.new(1, 0, 0, 2),
-		Position = UDim2.new(0, 0, 1, 0),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		BorderSizePixel = 0,
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 8),
 		Parent = header
 	})
-	CreateGradient(gradientLine, Theme.HeaderGradient)
 	
-	-- Title
+	CreateStroke(header, Theme.Primary, 1)
+	
+	-- Logo/Title
 	local title = Create("TextLabel", {
+		Name = "Title",
 		Size = UDim2.new(0, 200, 1, 0),
 		Position = UDim2.fromOffset(20, 0),
 		BackgroundTransparency = 1,
 		Text = "ELYSIUM",
 		Font = Enum.Font.GothamBlack,
-		TextSize = 24,
+		TextSize = 28,
 		TextColor3 = Theme.Text,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Parent = header
 	})
 	
-	-- Gradient Title
-	CreateGradient(title)
+	CreateGradient(title, Theme.HeaderGradient)
 	
-	-- Build Info
-	local build = Create("TextLabel", {
-		Size = UDim2.new(0, 100, 0, 20),
-		Position = UDim2.new(0, 20, 1, -25),
-		BackgroundTransparency = 1,
-		Text = "Build: 3.0.0",
-		Font = Enum.Font.GothamBold,
-		TextSize = 12,
-		TextColor3 = Theme.TextDim,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = header
-	})
-	
-	-- Page Counter
-	self.PageCounter = Create("TextLabel", {
-		Size = UDim2.new(0, 60, 0, 20),
-		Position = UDim2.new(1, -80, 0, 15),
-		BackgroundTransparency = 1,
-		Text = "1/1",
-		Font = Enum.Font.GothamBold,
-		TextSize = 14,
-		TextColor3 = Theme.Text,
-		Parent = header
-	})
-	
-	-- Close Button
-	local closeBtn = Create("TextButton", {
-		Size = UDim2.fromOffset(30, 30),
-		Position = UDim2.new(1, -40, 0, 10),
+	-- Version badge
+	local versionBadge = Create("Frame", {
+		Size = UDim2.fromOffset(60, 24),
+		Position = UDim2.new(0, 230, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
 		BackgroundColor3 = Theme.Element,
-		Text = "×",
-		Font = Enum.Font.GothamBold,
-		TextSize = 20,
-		TextColor3 = Theme.Text,
+		BorderSizePixel = 0,
 		Parent = header
 	})
 	
 	Create("UICorner", {
 		CornerRadius = UDim.new(0, 4),
+		Parent = versionBadge
+	})
+	
+	CreateStroke(versionBadge, Theme.Primary, 1)
+	
+	local versionText = Create("TextLabel", {
+		Size = UDim2.new(1, 0, 1, 0),
+		BackgroundTransparency = 1,
+		Text = "v" .. self.Version,
+		Font = Enum.Font.GothamBold,
+		TextSize = 11,
+		TextColor3 = Theme.Primary,
+		Parent = versionBadge
+	})
+	
+	-- Close button
+	local closeBtn = Create("TextButton", {
+		Name = "CloseButton",
+		Size = UDim2.fromOffset(40, 40),
+		Position = UDim2.new(1, -50, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = Theme.Element,
+		Text = "×",
+		Font = Enum.Font.GothamBold,
+		TextSize = 24,
+		TextColor3 = Theme.Text,
+		Parent = header
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
 		Parent = closeBtn
 	})
 	
+	closeBtn.MouseButton1Click:Connect(function()
+		self.MainFrame.Visible = false
+	end)
+	
 	closeBtn.MouseEnter:Connect(function()
-		Tween(closeBtn, {BackgroundColor3 = Color3.fromRGB(200, 50, 50)})
+		Tween(closeBtn, {BackgroundColor3 = Theme.Error, TextColor3 = Color3.fromRGB(255, 255, 255)})
 	end)
 	
 	closeBtn.MouseLeave:Connect(function()
-		Tween(closeBtn, {BackgroundColor3 = Theme.Element})
-	end)
-	
-	closeBtn.MouseButton1Click:Connect(function()
-		self:Toggle(false)
+		Tween(closeBtn, {BackgroundColor3 = Theme.Element, TextColor3 = Theme.Text})
 	end)
 	
 	self.Header = header
 end
 
+-- ========================================
+-- SIDEBAR CREATION
+-- ========================================
+
 function Elysium:CreateSidebar()
-	local sidebar = Create("Frame", {
+	self.Sidebar = Create("Frame", {
 		Name = "Sidebar",
-		Size = UDim2.new(0, 200, 1, -50),
-		Position = UDim2.fromOffset(0, 50),
+		Size = UDim2.new(0, 200, 1, -70),
+		Position = UDim2.fromOffset(10, 65),
 		BackgroundColor3 = Theme.Sidebar,
 		BorderSizePixel = 0,
 		Parent = self.MainFrame
 	})
 	
-	-- Tab Container
-	local tabList = Create("ScrollingFrame", {
-		Name = "TabList",
-		Size = UDim2.new(1, -10, 1, -20),
-		Position = UDim2.fromOffset(5, 10),
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = self.Sidebar
+	})
+	
+	CreateStroke(self.Sidebar, Theme.Primary, 1)
+	
+	-- Tab container with scroll
+	local tabContainer = Create("ScrollingFrame", {
+		Name = "TabContainer",
+		Size = UDim2.new(1, -10, 1, -10),
+		Position = UDim2.fromOffset(5, 5),
 		BackgroundTransparency = 1,
-		ScrollBarThickness = 2,
+		BorderSizePixel = 0,
+		ScrollBarThickness = 4,
 		ScrollBarImageColor3 = Theme.Primary,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		Parent = sidebar
+		Parent = self.Sidebar
 	})
 	
-	local listLayout = Create("UIListLayout", {
-		Padding = UDim.new(0, 4),
+	local tabLayout = Create("UIListLayout", {
+		Padding = UDim.new(0, 8),
 		SortOrder = Enum.SortOrder.LayoutOrder,
-		Parent = tabList
+		Parent = tabContainer
 	})
 	
-	self.TabList = tabList
+	self.TabContainer = tabContainer
 end
 
+-- ========================================
+-- CONTENT AREA CREATION
+-- ========================================
+
 function Elysium:CreateContentArea()
-	-- Content Background
-	local content = Create("Frame", {
-		Name = "Content",
-		Size = UDim2.new(1, -210, 1, -60),
-		Position = UDim2.fromOffset(205, 55),
+	self.ContentArea = Create("Frame", {
+		Name = "ContentArea",
+		Size = UDim2.new(1, -230, 1, -70),
+		Position = UDim2.fromOffset(220, 65),
 		BackgroundColor3 = Theme.Content,
 		BorderSizePixel = 0,
 		Parent = self.MainFrame
 	})
 	
 	Create("UICorner", {
-		CornerRadius = UDim.new(0, Theme.CornerRadius),
-		Parent = content
+		CornerRadius = UDim.new(0, 6),
+		Parent = self.ContentArea
 	})
 	
-	-- Options Container
-	local optionsFrame = Create("ScrollingFrame", {
-		Name = "Options",
-		Size = UDim2.new(1, -20, 1, -20),
-		Position = UDim2.fromOffset(10, 10),
-		BackgroundTransparency = 1,
-		ScrollBarThickness = 3,
-		ScrollBarImageColor3 = Theme.Primary,
-		CanvasSize = UDim2.new(0, 0, 0, 0),
-		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		Parent = content
-	})
+	CreateStroke(self.ContentArea, Theme.Primary, 1)
 	
-	local optionsLayout = Create("UIListLayout", {
-		Padding = UDim.new(0, 6),
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Parent = optionsFrame
-	})
-	
-	-- Right Side Indicators (The Explosive Style)
-	local indicatorBar = Create("Frame", {
-		Name = "Indicators",
-		Size = UDim2.new(0, 30, 1, -20),
-		Position = UDim2.new(1, -35, 0, 10),
-		BackgroundTransparency = 1,
-		Parent = content
-	})
-	
-	self.OptionsFrame = optionsFrame
-	self.IndicatorBar = indicatorBar
-	self.Content = content
+	self.ContentPages = {}
 end
 
-function Elysium:CreateTooltip()
-	self.Tooltip = Create("Frame", {
-		Size = UDim2.fromOffset(200, 0),
-		BackgroundColor3 = Theme.Element,
-		BorderSizePixel = 0,
-		Visible = false,
-		ZIndex = 100,
+-- ========================================
+-- NOTIFICATION CONTAINER
+-- ========================================
+
+function Elysium:CreateNotificationContainer()
+	self.NotificationContainer = Create("Frame", {
+		Name = "NotificationContainer",
+		Size = UDim2.fromOffset(350, 500),
+		Position = UDim2.new(1, -370, 0, 20),
+		BackgroundTransparency = 1,
 		Parent = self.ScreenGui
 	})
 	
-	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
-		Parent = self.Tooltip
+	Create("UIListLayout", {
+		Padding = UDim.new(0, 10),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		VerticalAlignment = Enum.VerticalAlignment.Bottom,
+		Parent = self.NotificationContainer
 	})
-	
-	CreateGlow(self.Tooltip, Theme.Primary, 10)
-	
-	local text = Create("TextLabel", {
-		Name = "Text",
-		Size = UDim2.new(1, -20, 1, -10),
-		Position = UDim2.fromOffset(10, 5),
-		BackgroundTransparency = 1,
-		Text = "",
-		Font = Enum.Font.Gotham,
-		TextSize = 12,
-		TextColor3 = Theme.Text,
-		TextWrapped = true,
-		Parent = self.Tooltip
-	})
-	
-	self.TooltipText = text
 end
 
--- Tab System
+-- ========================================
+-- TAB SYSTEM
+-- ========================================
+
 function Elysium:AddTab(name, icon)
-	local tabBtn = Create("TextButton", {
-		Name = name .. "Tab",
-		Size = UDim2.new(1, -10, 0, 40),
+	local tab = {}
+	tab.Name = name
+	tab.Button = Create("TextButton", {
+		Name = name,
+		Size = UDim2.new(1, -10, 0, 45),
 		BackgroundColor3 = Theme.Element,
-		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
 		Text = "",
-		LayoutOrder = #self.Tabs,
-		Parent = self.TabList
+		AutoButtonColor = false,
+		Parent = self.TabContainer
 	})
 	
-	local corner = Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
-		Parent = tabBtn
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = tab.Button
 	})
 	
-	-- Active Indicator (Left side pink bar)
-	local indicator = Create("Frame", {
-		Name = "Indicator",
-		Size = UDim2.new(0, 3, 0.6, 0),
-		Position = UDim2.fromOffset(0, 0.2),
-		AnchorPoint = Vector2.new(0, 0),
+	-- Icon (if provided)
+	if icon then
+		local iconLabel = Create("ImageLabel", {
+			Size = UDim2.fromOffset(24, 24),
+			Position = UDim2.fromOffset(12, 10.5),
+			BackgroundTransparency = 1,
+			Image = icon,
+			ImageColor3 = Theme.TextDim,
+			Parent = tab.Button
+		})
+		tab.Icon = iconLabel
+	end
+	
+	-- Tab text
+	local tabText = Create("TextLabel", {
+		Size = UDim2.new(1, icon and -50 or -20, 1, 0),
+		Position = UDim2.fromOffset(icon and 45 or 15, 0),
+		BackgroundTransparency = 1,
+		Text = name,
+		Font = Enum.Font.GothamBold,
+		TextSize = 15,
+		TextColor3 = Theme.TextDim,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = tab.Button
+	})
+	
+	tab.Text = tabText
+	
+	-- Active indicator
+	local activeBar = Create("Frame", {
+		Name = "ActiveBar",
+		Size = UDim2.new(0, 3, 0.7, 0),
+		Position = UDim2.new(0, 0, 0.15, 0),
 		BackgroundColor3 = Theme.Primary,
 		BorderSizePixel = 0,
 		Visible = false,
-		Parent = tabBtn
+		Parent = tab.Button
 	})
 	
 	Create("UICorner", {
 		CornerRadius = UDim.new(1, 0),
-		Parent = indicator
+		Parent = activeBar
 	})
 	
-	-- Icon
-	if icon then
-		local iconLabel = Create("ImageLabel", {
-			Size = UDim2.fromOffset(20, 20),
-			Position = UDim2.fromOffset(15, 10),
-			BackgroundTransparency = 1,
-			Image = icon,
-			ImageColor3 = Theme.TextDim,
-			Parent = tabBtn
-		})
-	end
+	tab.ActiveBar = activeBar
 	
-	-- Label
-	local label = Create("TextLabel", {
-		Size = UDim2.new(1, -50, 1, 0),
-		Position = UDim2.fromOffset(icon and 45 or 20, 0),
-		BackgroundTransparency = 1,
-		Text = name:upper(),
-		Font = Enum.Font.GothamBold,
-		TextSize = 13,
-		TextColor3 = Theme.TextDim,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = tabBtn
-	})
-	
-	-- Arrow
-	local arrow = Create("ImageLabel", {
-		Size = UDim2.fromOffset(16, 16),
-		Position = UDim2.new(1, -26, 0.5, 0),
-		AnchorPoint = Vector2.new(0, 0.5),
-		BackgroundTransparency = 1,
-		Image = "rbxassetid://3926305904",
-		ImageRectOffset = Vector2.new(964, 284),
-		ImageRectSize = Vector2.new(36, 36),
-		ImageColor3 = Theme.Primary,
-		Visible = false,
-		Parent = tabBtn
-	})
-	
-	-- Page
+	-- Content page
 	local page = Create("ScrollingFrame", {
 		Name = name .. "Page",
-		Size = UDim2.fromScale(1, 1),
+		Size = UDim2.new(1, -20, 1, -20),
+		Position = UDim2.fromOffset(10, 10),
 		BackgroundTransparency = 1,
-		ScrollBarThickness = 0,
+		BorderSizePixel = 0,
+		ScrollBarThickness = 4,
+		ScrollBarImageColor3 = Theme.Primary,
+		CanvasSize = UDim2.new(0, 0, 0, 0),
+		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		Visible = false,
-		Parent = self.OptionsFrame
+		Parent = self.ContentArea
 	})
 	
-	local pageLayout = Create("UIListLayout", {
-		Padding = UDim.new(0, 8),
+	Create("UIListLayout", {
+		Padding = UDim.new(0, 10),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 		Parent = page
 	})
 	
-	-- Tab Logic
-	tabBtn.MouseEnter:Connect(function()
-		if self.CurrentTab ~= page then
-			Tween(tabBtn, {BackgroundTransparency = 0.8})
-			Tween(label, {TextColor3 = Theme.Text})
+	tab.Page = page
+	
+	-- Button click
+	tab.Button.MouseButton1Click:Connect(function()
+		self:SelectTab(tab)
+	end)
+	
+	-- Hover effects
+	tab.Button.MouseEnter:Connect(function()
+		if tab ~= self.SelectedTab then
+			Tween(tab.Button, {BackgroundColor3 = Theme.ElementHover})
+			Tween(tabText, {TextColor3 = Theme.Text})
+			if tab.Icon then
+				Tween(tab.Icon, {ImageColor3 = Theme.Text})
+			end
 		end
 	end)
 	
-	tabBtn.MouseLeave:Connect(function()
-		if self.CurrentTab ~= page then
-			Tween(tabBtn, {BackgroundTransparency = 1})
-			Tween(label, {TextColor3 = Theme.TextDim})
+	tab.Button.MouseLeave:Connect(function()
+		if tab ~= self.SelectedTab then
+			Tween(tab.Button, {BackgroundColor3 = Theme.Element})
+			Tween(tabText, {TextColor3 = Theme.TextDim})
+			if tab.Icon then
+				Tween(tab.Icon, {ImageColor3 = Theme.TextDim})
+			end
 		end
 	end)
 	
-	tabBtn.MouseButton1Click:Connect(function()
-		self:SelectTab(name)
-	end)
+	table.insert(self.Tabs, tab)
 	
-	local tabData = {
-		Name = name,
-		Button = tabBtn,
-		Page = page,
-		Indicator = indicator,
-		Arrow = arrow,
-		Label = label,
-		Elements = {}
-	}
-	
-	table.insert(self.Tabs, tabData)
-	
-	-- Auto select first
+	-- Auto select first tab
 	if #self.Tabs == 1 then
-		task.delay(0.1, function()
-			self:SelectTab(name)
-		end)
+		self:SelectTab(tab)
 	end
 	
-	return page, tabData
+	return page
 end
 
-function Elysium:SelectTab(name)
-	for _, tab in ipairs(self.Tabs) do
-		if tab.Name == name then
-			-- Show
-			tab.Page.Visible = true
-			self.CurrentTab = tab.Page
-			
-			Tween(tab.Button, {BackgroundTransparency = 0.6})
-			Tween(tab.Label, {TextColor3 = Theme.Primary})
-			tab.Indicator.Visible = true
-			tab.Arrow.Visible = true
-			
-			-- Glow effect
-			CreateGlow(tab.Button, Theme.Primary, 15)
-			
-			-- Update counter
-			self.PageCounter.Text = tostring(table.find(self.Tabs, tab)) .. "/" .. tostring(#self.Tabs)
-			
-		else
-			-- Hide
-			tab.Page.Visible = false
-			Tween(tab.Button, {BackgroundTransparency = 1})
-			Tween(tab.Label, {TextColor3 = Theme.TextDim})
-			tab.Indicator.Visible = false
-			tab.Arrow.Visible = false
-			
-			-- Remove glow
-			local glow = tab.Button:FindFirstChild("Glow")
-			if glow then glow:Destroy() end
+function Elysium:SelectTab(tab)
+	-- Deselect current tab
+	if self.SelectedTab then
+		self.SelectedTab.Page.Visible = false
+		self.SelectedTab.ActiveBar.Visible = false
+		Tween(self.SelectedTab.Button, {BackgroundColor3 = Theme.Element})
+		Tween(self.SelectedTab.Text, {TextColor3 = Theme.TextDim})
+		if self.SelectedTab.Icon then
+			Tween(self.SelectedTab.Icon, {ImageColor3 = Theme.TextDim})
 		end
 	end
-end
-
--- Component Creation
-function Elysium:CreateButton(parent, text, callback, description)
-	local btn = Create("TextButton", {
-		Size = UDim2.new(1, -40, 0, 45),
-		BackgroundColor3 = Theme.Element,
-		Text = "",
-		Parent = parent
-	})
 	
-	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
-		Parent = btn
-	})
-	
-	-- Left accent line
-	local accent = Create("Frame", {
-		Size = UDim2.new(0, 2, 0.7, 0),
-		Position = UDim2.fromOffset(0, 0.15),
-		BackgroundColor3 = Theme.Primary,
-		BorderSizePixel = 0,
-		Parent = btn
-	})
-	
-	local label = Create("TextLabel", {
-		Size = UDim2.new(1, -60, 1, 0),
-		Position = UDim2.fromOffset(15, 0),
-		BackgroundTransparency = 1,
-		Text = text,
-		Font = Enum.Font.GothamBold,
-		TextSize = 14,
-		TextColor3 = Theme.Text,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = btn
-	})
-	
-	-- Arrow indicator
-	local arrow = Create("ImageLabel", {
-		Size = UDim2.fromOffset(20, 20),
-		Position = UDim2.new(1, -30, 0.5, 0),
-		AnchorPoint = Vector2.new(0, 0.5),
-		BackgroundTransparency = 1,
-		Image = "rbxassetid://3926305904",
-		ImageRectOffset = Vector2.new(964, 284),
-		ImageRectSize = Vector2.new(36, 36),
-		ImageColor3 = Theme.Primary,
-		Parent = btn
-	})
-	
-	-- Hover Effects
-	btn.MouseEnter:Connect(function()
-		Tween(btn, {BackgroundColor3 = Theme.ElementHover})
-		Tween(accent, {BackgroundColor3 = Theme.Secondary})
-		self:ShowTooltip(description, btn)
-	end)
-	
-	btn.MouseLeave:Connect(function()
-		Tween(btn, {BackgroundColor3 = Theme.Element})
-		Tween(accent, {BackgroundColor3 = Theme.Primary})
-		self:HideTooltip()
-	end)
-	
-	btn.MouseButton1Click:Connect(function()
-		Tween(btn, {BackgroundColor3 = Theme.ElementActive}, 0.1)
-		task.delay(0.1, function()
-			Tween(btn, {BackgroundColor3 = Theme.ElementHover}, 0.1)
-		end)
-		if callback then callback() end
-	end)
-	
-	return btn
-end
-
-function Elysium:CreateToggle(parent, text, flag, default, callback)
-	default = default or false
-	self.Flags[flag] = default
-	
-	local frame = Create("Frame", {
-		Size = UDim2.new(1, -40, 0, 45),
-		BackgroundColor3 = Theme.Element,
-		Parent = parent
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
-		Parent = frame
-	})
-	
-	-- Status indicator (left side)
-	local status = Create("Frame", {
-		Size = UDim2.new(0, 3, 0.7, 0),
-		Position = UDim2.fromOffset(0, 0.15),
-		BackgroundColor3 = default and Theme.Primary or Theme.Border,
-		BorderSizePixel = 0,
-		Parent = frame
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(1, 0),
-		Parent = status
-	})
-	
-	-- Label
-	local label = Create("TextLabel", {
-		Size = UDim2.new(1, -80, 1, 0),
-		Position = UDim2.fromOffset(15, 0),
-		BackgroundTransparency = 1,
-		Text = text,
-		Font = Enum.Font.GothamBold,
-		TextSize = 14,
-		TextColor3 = Theme.Text,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = frame
-	})
-	
-	-- Toggle Switch
-	local switch = Create("Frame", {
-		Size = UDim2.fromOffset(50, 26),
-		Position = UDim2.new(1, -65, 0.5, 0),
-		AnchorPoint = Vector2.new(0, 0.5),
-		BackgroundColor3 = default and Theme.Primary or Color3.fromRGB(60, 60, 80),
-		BorderSizePixel = 0,
-		Parent = frame
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(1, 0),
-		Parent = switch
-	})
-	
-	-- Glow when on
-	if default then
-		CreateGlow(switch, Theme.Primary, 10)
+	-- Select new tab
+	self.SelectedTab = tab
+	tab.Page.Visible = true
+	tab.ActiveBar.Visible = true
+	Tween(tab.Button, {BackgroundColor3 = Theme.ElementActive})
+	Tween(tab.Text, {TextColor3 = Theme.Primary})
+	if tab.Icon then
+		Tween(tab.Icon, {ImageColor3 = Theme.Primary})
 	end
 	
-	-- Knob
-	local knob = Create("Frame", {
-		Size = UDim2.fromOffset(20, 20),
-		Position = UDim2.new(0, default and 28 or 2, 0.5, 0),
-		AnchorPoint = Vector2.new(0, 0.5),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		BorderSizePixel = 0,
-		Parent = switch
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(1, 0),
-		Parent = knob
-	})
-	
-	-- Click area
-	local click = Create("TextButton", {
-		Size = UDim2.fromScale(1, 1),
-		BackgroundTransparency = 1,
-		Text = "",
-		Parent = frame
-	})
-	
-	local function update_state(state)
-		self.Flags[flag] = state
-		Tween(status, {BackgroundColor3 = state and Theme.Primary or Theme.Border})
-		Tween(switch, {BackgroundColor3 = state and Theme.Primary or Color3.fromRGB(60, 60, 80)})
-		Tween(knob, {Position = UDim2.new(0, state and 28 or 2, 0.5, 0)})
-		
-		-- Handle glow
-		local glow = switch:FindFirstChild("Glow")
-		if state and not glow then
-			CreateGlow(switch, Theme.Primary, 10)
-		elseif not state and glow then
-			glow:Destroy()
-		end
-		
-		if callback then callback(state) end
-	end
-	
-	click.MouseButton1Click:Connect(function()
-		update_state(not self.Flags[flag])
-	end)
-	
-	frame.MouseEnter:Connect(function()
-		Tween(frame, {BackgroundColor3 = Theme.ElementHover})
-	end)
-	
-	frame.MouseLeave:Connect(function()
-		Tween(frame, {BackgroundColor3 = Theme.Element})
-	end)
-	
-	return frame, update_state
+	CreateGlow(tab.Button, Theme.Primary, 0.6)
 end
 
-function Elysium:CreateSlider(parent, text, min, max, default, decimals, flag, callback)
-	default = default or min
-	decimals = decimals or 0
-	self.Flags[flag] = default
-	
-	local frame = Create("Frame", {
-		Size = UDim2.new(1, -40, 0, 60),
-		BackgroundColor3 = Theme.Element,
-		Parent = parent
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
-		Parent = frame
-	})
-	
-	-- Label
-	local label = Create("TextLabel", {
-		Size = UDim2.new(1, -100, 0, 25),
-		Position = UDim2.fromOffset(15, 5),
-		BackgroundTransparency = 1,
-		Text = text,
-		Font = Enum.Font.GothamBold,
-		TextSize = 14,
-		TextColor3 = Theme.Text,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = frame
-	})
-	
-	-- Value Box
-	local valueBox = Create("TextLabel", {
-		Size = UDim2.fromOffset(70, 25),
-		Position = UDim2.new(1, -85, 0, 5),
-		BackgroundColor3 = Theme.Background,
-		Text = tostring(default),
-		Font = Enum.Font.GothamBold,
-		TextSize = 13,
-		TextColor3 = Theme.Primary,
-		Parent = frame
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
-		Parent = valueBox
-	})
-	
-	-- Slider Track
-	local track = Create("Frame", {
-		Size = UDim2.new(1, -30, 0, 8),
-		Position = UDim2.fromOffset(15, 38),
-		BackgroundColor3 = Color3.fromRGB(40, 40, 60),
-		BorderSizePixel = 0,
-		Parent = frame
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(1, 0),
-		Parent = track
-	})
-	
-	-- Fill
-	local fill = Create("Frame", {
-		Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
-		BackgroundColor3 = Theme.Primary,
-		BorderSizePixel = 0,
-		Parent = track
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(1, 0),
-		Parent = fill
-	})
-	
-	-- Knob
-	local knob = Create("Frame", {
-		Size = UDim2.fromOffset(16, 16),
-		Position = UDim2.new((default - min) / (max - min), -8, 0.5, 0),
-		AnchorPoint = Vector2.new(0, 0.5),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		BorderSizePixel = 0,
-		ZIndex = 2,
-		Parent = track
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(1, 0),
-		Parent = knob
-	})
-	
-	-- Glow
-	CreateGlow(knob, Theme.Primary, 8)
-	
-	-- Logic
-	local dragging = false
-	
-	local function update(input)
-		local pos = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-		local value = min + (max - min) * pos
-		
-		if decimals == 0 then
-			value = math.floor(value)
-		else
-			value = math.floor(value * (10 ^ decimals)) / (10 ^ decimals)
-		end
-		
-		self.Flags[flag] = value
-		valueBox.Text = tostring(value)
-		fill.Size = UDim2.new(pos, 0, 1, 0)
-		knob.Position = UDim2.new(pos, -8, 0.5, 0)
-		
-		if callback then callback(value) end
-	end
-	
-	track.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = true
-			update(input)
-		end
-	end)
-	
-	knob.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = true
-		end
-	end)
-	
-	UserInputService.InputChanged:Connect(function(input)
-		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-			update(input)
-		end
-	end)
-	
-	UserInputService.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = false
-		end
-	end)
-	
-	frame.MouseEnter:Connect(function()
-		Tween(frame, {BackgroundColor3 = Theme.ElementHover})
-	end)
-	
-	frame.MouseLeave:Connect(function()
-		Tween(frame, {BackgroundColor3 = Theme.Element})
-	end)
-	
-	return frame
-end
+-- ========================================
+-- COMPONENT: CATEGORY
+-- ========================================
 
-function Elysium:CreateDropdown(parent, text, options, default, flag, callback)
-	default = default or options[1]
-	self.Flags[flag] = default
-	
-	local frame = Create("Frame", {
-		Size = UDim2.new(1, -40, 0, 45),
-		BackgroundColor3 = Theme.Element,
-		ClipsDescendants = true,
-		Parent = parent
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
-		Parent = frame
-	})
-	
-	-- Label
-	local label = Create("TextLabel", {
-		Size = UDim2.new(1, -150, 1, 0),
-		Position = UDim2.fromOffset(15, 0),
-		BackgroundTransparency = 1,
-		Text = text .. ":",
-		Font = Enum.Font.GothamBold,
-		TextSize = 14,
-		TextColor3 = Theme.Text,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = frame
-	})
-	
-	-- Selected Value
-	local valueBtn = Create("TextButton", {
-		Size = UDim2.fromOffset(120, 35),
-		Position = UDim2.new(1, -135, 0.5, 0),
-		AnchorPoint = Vector2.new(0, 0.5),
-		BackgroundColor3 = Theme.Background,
-		Text = default,
-		Font = Enum.Font.GothamBold,
-		TextSize = 13,
-		TextColor3 = Theme.Primary,
-		Parent = frame
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
-		Parent = valueBtn
-	})
-	
-	-- Arrow
-	local arrow = Create("ImageLabel", {
-		Size = UDim2.fromOffset(16, 16),
-		Position = UDim2.new(1, -25, 0.5, 0),
-		AnchorPoint = Vector2.new(0, 0.5),
-		BackgroundTransparency = 1,
-		Image = "rbxassetid://3926305904",
-		ImageRectOffset = Vector2.new(964, 284),
-		ImageRectSize = Vector2.new(36, 36),
-		ImageColor3 = Theme.Primary,
-		Parent = valueBtn
-	})
-	
-	-- Options Container
-	local optionsFrame = Create("Frame", {
-		Size = UDim2.new(1, -30, 0, #options * 35),
-		Position = UDim2.fromOffset(15, 50),
-		BackgroundTransparency = 1,
-		Visible = false,
-		Parent = frame
-	})
-	
-	local optionsList = Create("UIListLayout", {
-		Padding = UDim.new(0, 4),
-		Parent = optionsFrame
-	})
-	
-	local isOpen = false
-	
-	local function toggle()
-		isOpen = not isOpen
-		Tween(arrow, {Rotation = isOpen and 180 or 0})
-		Tween(frame, {Size = UDim2.new(1, -40, 0, isOpen and 50 + #options * 35 or 45)})
-		optionsFrame.Visible = isOpen
-	end
-	
-	for i, option in ipairs(options) do
-		local optBtn = Create("TextButton", {
-			Size = UDim2.new(1, 0, 0, 35),
-			BackgroundColor3 = Theme.Background,
-			Text = option,
-			Font = Enum.Font.Gotham,
-			TextSize = 13,
-			TextColor3 = Theme.TextDim,
-			Parent = optionsFrame
-		})
-		
-		Create("UICorner", {
-			CornerRadius = UDim.new(0, 4),
-			Parent = optBtn
-		})
-		
-		optBtn.MouseEnter:Connect(function()
-			Tween(optBtn, {BackgroundColor3 = Theme.ElementHover, TextColor3 = Theme.Text})
-		end)
-		
-		optBtn.MouseLeave:Connect(function()
-			Tween(optBtn, {BackgroundColor3 = Theme.Background, TextColor3 = Theme.TextDim})
-		end)
-		
-		optBtn.MouseButton1Click:Connect(function()
-			self.Flags[flag] = option
-			valueBtn.Text = option
-			toggle()
-			if callback then callback(option) end
-		end)
-	end
-	
-	valueBtn.MouseButton1Click:Connect(toggle)
-	
-	frame.MouseEnter:Connect(function()
-		Tween(frame, {BackgroundColor3 = Theme.ElementHover})
-	end)
-	
-	frame.MouseLeave:Connect(function()
-		if not isOpen then
-			Tween(frame, {BackgroundColor3 = Theme.Element})
-		end
-	end)
-	
-	return frame
-end
-
-function Elysium:CreateKeybind(parent, text, defaultKey, flag, callback)
-	self.Flags[flag] = defaultKey
-	
-	local frame = Create("Frame", {
-		Size = UDim2.new(1, -40, 0, 45),
-		BackgroundColor3 = Theme.Element,
-		Parent = parent
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
-		Parent = frame
-	})
-	
-	-- Label
-	local label = Create("TextLabel", {
-		Size = UDim2.new(1, -100, 1, 0),
-		Position = UDim2.fromOffset(15, 0),
-		BackgroundTransparency = 1,
-		Text = text,
-		Font = Enum.Font.GothamBold,
-		TextSize = 14,
-		TextColor3 = Theme.Text,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = frame
-	})
-	
-	-- Key Button
-	local keyBtn = Create("TextButton", {
-		Size = UDim2.fromOffset(80, 35),
-		Position = UDim2.new(1, -95, 0.5, 0),
-		AnchorPoint = Vector2.new(0, 0.5),
-		BackgroundColor3 = Theme.Primary,
-		Text = defaultKey and defaultKey.Name or "None",
-		Font = Enum.Font.GothamBold,
-		TextSize = 12,
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		Parent = frame
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
-		Parent = keyBtn
-	})
-	
-	CreateGlow(keyBtn, Theme.Primary, 8)
-	
-	local listening = false
-	
-	keyBtn.MouseButton1Click:Connect(function()
-		listening = true
-		keyBtn.Text = "..."
-		Tween(keyBtn, {BackgroundColor3 = Theme.Secondary})
-	end)
-	
-	UserInputService.InputBegan:Connect(function(input)
-		if listening and input.UserInputType == Enum.UserInputType.Keyboard then
-			listening = false
-			self.Flags[flag] = input.KeyCode
-			keyBtn.Text = input.KeyCode.Name
-			Tween(keyBtn, {BackgroundColor3 = Theme.Primary})
-			if callback then callback(input.KeyCode) end
-		elseif input.KeyCode == self.Flags[flag] and not listening then
-			if callback then callback(input.KeyCode) end
-		end
-	end)
-	
-	frame.MouseEnter:Connect(function()
-		Tween(frame, {BackgroundColor3 = Theme.ElementHover})
-	end)
-	
-	frame.MouseLeave:Connect(function()
-		Tween(frame, {BackgroundColor3 = Theme.Element})
-	end)
-	
-	return frame
-end
-
--- Sub-Menu (Category Headers like in Explosive)
 function Elysium:CreateCategory(parent, name)
 	local category = Create("Frame", {
-		Size = UDim2.new(1, -40, 0, 35),
+		Size = UDim2.new(1, -20, 0, 40),
 		BackgroundTransparency = 1,
 		Parent = parent
 	})
 	
 	-- Pink left bar
 	local bar = Create("Frame", {
-		Size = UDim2.new(0, 3, 0.8, 0),
-		Position = UDim2.fromOffset(0, 0.1),
+		Size = UDim2.new(0, 4, 0.75, 0),
+		Position = UDim2.new(0, 0, 0.125, 0),
 		BackgroundColor3 = Theme.Primary,
 		BorderSizePixel = 0,
 		Parent = category
@@ -1083,13 +786,15 @@ function Elysium:CreateCategory(parent, name)
 		Parent = bar
 	})
 	
+	CreateGlow(bar, Theme.Primary, 0.4)
+	
 	local label = Create("TextLabel", {
 		Size = UDim2.new(1, -20, 1, 0),
 		Position = UDim2.fromOffset(15, 0),
 		BackgroundTransparency = 1,
 		Text = name:upper(),
 		Font = Enum.Font.GothamBlack,
-		TextSize = 16,
+		TextSize = 17,
 		TextColor3 = Theme.Primary,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Parent = category
@@ -1100,19 +805,726 @@ function Elysium:CreateCategory(parent, name)
 	return category
 end
 
--- Color Picker
+-- ========================================
+-- COMPONENT: DIVIDER
+-- ========================================
+
+function Elysium:CreateDivider(parent)
+	local divider = Create("Frame", {
+		Size = UDim2.new(1, -40, 0, 2),
+		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
+		Parent = parent
+	})
+	
+	CreateGradient(divider, Theme.HeaderGradient)
+	
+	return divider
+end
+
+-- ========================================
+-- COMPONENT: INFO LABEL
+-- ========================================
+
+function Elysium:CreateLabel(parent, text)
+	local frame = Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 35),
+		BackgroundTransparency = 1,
+		Parent = parent
+	})
+	
+	local label = Create("TextLabel", {
+		Size = UDim2.new(1, -10, 1, 0),
+		Position = UDim2.fromOffset(10, 0),
+		BackgroundTransparency = 1,
+		Text = text,
+		Font = Enum.Font.Gotham,
+		TextSize = 13,
+		TextColor3 = Theme.TextDim,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextWrapped = true,
+		Parent = frame
+	})
+	
+	return label
+end
+
+-- ========================================
+-- COMPONENT: TOGGLE
+-- ========================================
+
+function Elysium:CreateToggle(parent, text, flag, default, callback)
+	default = default or false
+	self.Flags[flag] = default
+	
+	local frame = Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 45),
+		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
+		Parent = parent
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = frame
+	})
+	
+	CreateStroke(frame, default and Theme.Primary or Theme.Element, 1)
+	
+	-- Label
+	local label = Create("TextLabel", {
+		Size = UDim2.new(1, -80, 1, 0),
+		Position = UDim2.fromOffset(15, 0),
+		BackgroundTransparency = 1,
+		Text = text,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
+		TextColor3 = Theme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = frame
+	})
+	
+	-- Toggle switch
+	local toggleBg = Create("Frame", {
+		Size = UDim2.fromOffset(50, 26),
+		Position = UDim2.new(1, -60, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = default and Theme.Primary or Theme.ElementHover,
+		BorderSizePixel = 0,
+		Parent = frame
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(1, 0),
+		Parent = toggleBg
+	})
+	
+	local toggleCircle = Create("Frame", {
+		Size = UDim2.fromOffset(20, 20),
+		Position = default and UDim2.new(1, -23, 0.5, 0) or UDim2.new(0, 3, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BorderSizePixel = 0,
+		Parent = toggleBg
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(1, 0),
+		Parent = toggleCircle
+	})
+	
+	if default then
+		CreateGlow(toggleBg, Theme.Primary, 0.5)
+	end
+	
+	-- Button
+	local button = Create("TextButton", {
+		Size = UDim2.new(1, 0, 1, 0),
+		BackgroundTransparency = 1,
+		Text = "",
+		Parent = frame
+	})
+	
+	button.MouseButton1Click:Connect(function()
+		self.Flags[flag] = not self.Flags[flag]
+		
+		if self.Flags[flag] then
+			Tween(toggleCircle, {Position = UDim2.new(1, -23, 0.5, 0)})
+			Tween(toggleBg, {BackgroundColor3 = Theme.Primary})
+			CreateGlow(toggleBg, Theme.Primary, 0.5)
+			CreateStroke(frame, Theme.Primary, 1)
+		else
+			Tween(toggleCircle, {Position = UDim2.new(0, 3, 0.5, 0)})
+			Tween(toggleBg, {BackgroundColor3 = Theme.ElementHover})
+			local glow = toggleBg:FindFirstChild("Glow")
+			if glow then glow:Destroy() end
+			CreateStroke(frame, Theme.Element, 1)
+		end
+		
+		if callback then
+			callback(self.Flags[flag])
+		end
+	end)
+	
+	button.MouseEnter:Connect(function()
+		Tween(frame, {BackgroundColor3 = Theme.ElementHover})
+	end)
+	
+	button.MouseLeave:Connect(function()
+		Tween(frame, {BackgroundColor3 = Theme.Element})
+	end)
+	
+	return frame
+end
+
+-- ========================================
+-- COMPONENT: SLIDER
+-- ========================================
+
+function Elysium:CreateSlider(parent, text, min, max, default, decimals, flag, callback)
+	default = default or min
+	decimals = decimals or 0
+	self.Flags[flag] = default
+	
+	local frame = Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 60),
+		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
+		Parent = parent
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = frame
+	})
+	
+	-- Label
+	local label = Create("TextLabel", {
+		Size = UDim2.new(1, -20, 0, 20),
+		Position = UDim2.fromOffset(15, 8),
+		BackgroundTransparency = 1,
+		Text = text,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
+		TextColor3 = Theme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = frame
+	})
+	
+	-- Value display
+	local valueLabel = Create("TextLabel", {
+		Size = UDim2.fromOffset(60, 20),
+		Position = UDim2.new(1, -70, 0, 8),
+		BackgroundColor3 = Theme.ElementHover,
+		Text = tostring(default),
+		Font = Enum.Font.GothamBold,
+		TextSize = 13,
+		TextColor3 = Theme.Primary,
+		Parent = frame
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 4),
+		Parent = valueLabel
+	})
+	
+	-- Slider background
+	local sliderBg = Create("Frame", {
+		Size = UDim2.new(1, -30, 0, 8),
+		Position = UDim2.fromOffset(15, 38),
+		BackgroundColor3 = Theme.ElementHover,
+		BorderSizePixel = 0,
+		Parent = frame
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(1, 0),
+		Parent = sliderBg
+	})
+	
+	-- Slider fill
+	local sliderFill = Create("Frame", {
+		Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
+		BackgroundColor3 = Theme.Primary,
+		BorderSizePixel = 0,
+		Parent = sliderBg
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(1, 0),
+		Parent = sliderFill
+	})
+	
+	CreateGradient(sliderFill, Theme.HeaderGradient)
+	CreateGlow(sliderFill, Theme.Primary, 0.5)
+	
+	-- Slider knob
+	local sliderKnob = Create("Frame", {
+		Size = UDim2.fromOffset(18, 18),
+		Position = UDim2.new((default - min) / (max - min), -9, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BorderSizePixel = 0,
+		Parent = sliderBg
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(1, 0),
+		Parent = sliderKnob
+	})
+	
+	CreateGlow(sliderKnob, Theme.Primary, 0.6)
+	CreateStroke(sliderKnob, Theme.Primary, 2)
+	
+	-- Dragging logic
+	local dragging = false
+	
+	local function updateSlider(input)
+		local pos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+		local value = min + (max - min) * pos
+		
+		if decimals == 0 then
+			value = math.floor(value + 0.5)
+		else
+			value = math.floor(value * (10 ^ decimals) + 0.5) / (10 ^ decimals)
+		end
+		
+		self.Flags[flag] = value
+		valueLabel.Text = tostring(value)
+		
+		Tween(sliderFill, {Size = UDim2.new(pos, 0, 1, 0)}, 0.1)
+		Tween(sliderKnob, {Position = UDim2.new(pos, -9, 0.5, 0)}, 0.1)
+		
+		if callback then
+			callback(value)
+		end
+	end
+	
+	sliderBg.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			updateSlider(input)
+		end
+	end)
+	
+	sliderBg.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
+	
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			updateSlider(input)
+		end
+	end)
+	
+	frame.MouseEnter:Connect(function()
+		Tween(frame, {BackgroundColor3 = Theme.ElementHover})
+	end)
+	
+	frame.MouseLeave:Connect(function()
+		Tween(frame, {BackgroundColor3 = Theme.Element})
+	end)
+	
+	return frame
+end
+
+-- ========================================
+-- COMPONENT: BUTTON
+-- ========================================
+
+function Elysium:CreateButton(parent, text, callback)
+	local button = Create("TextButton", {
+		Size = UDim2.new(1, -20, 0, 45),
+		BackgroundColor3 = Theme.Primary,
+		BorderSizePixel = 0,
+		Text = text,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		AutoButtonColor = false,
+		Parent = parent
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = button
+	})
+	
+	CreateGradient(button, Theme.HeaderGradient)
+	CreateGlow(button, Theme.Primary, 0.6)
+	
+	button.MouseButton1Click:Connect(function()
+		-- Click animation
+		Tween(button, {Size = UDim2.new(1, -20, 0, 42)}, 0.1)
+		wait(0.1)
+		Tween(button, {Size = UDim2.new(1, -20, 0, 45)}, 0.1)
+		
+		if callback then
+			callback()
+		end
+	end)
+	
+	button.MouseEnter:Connect(function()
+		Tween(button, {BackgroundColor3 = Theme.Secondary})
+	end)
+	
+	button.MouseLeave:Connect(function()
+		Tween(button, {BackgroundColor3 = Theme.Primary})
+	end)
+	
+	return button
+end
+
+-- ========================================
+-- COMPONENT: DROPDOWN
+-- ========================================
+
+function Elysium:CreateDropdown(parent, text, options, default, flag, callback)
+	default = default or options[1]
+	self.Flags[flag] = default
+	
+	local frame = Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 45),
+		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
+		Parent = parent
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = frame
+	})
+	
+	-- Label
+	local label = Create("TextLabel", {
+		Size = UDim2.new(0.5, -20, 1, 0),
+		Position = UDim2.fromOffset(15, 0),
+		BackgroundTransparency = 1,
+		Text = text,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
+		TextColor3 = Theme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = frame
+	})
+	
+	-- Selected value
+	local valueLabel = Create("TextLabel", {
+		Size = UDim2.new(0.5, -80, 0, 30),
+		Position = UDim2.new(0.5, 10, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = Theme.ElementHover,
+		Text = default,
+		Font = Enum.Font.Gotham,
+		TextSize = 13,
+		TextColor3 = Theme.Primary,
+		Parent = frame
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 4),
+		Parent = valueLabel
+	})
+	
+	-- Arrow icon
+	local arrow = Create("TextLabel", {
+		Size = UDim2.fromOffset(20, 20),
+		Position = UDim2.new(1, -35, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundTransparency = 1,
+		Text = "▼",
+		Font = Enum.Font.GothamBold,
+		TextSize = 10,
+		TextColor3 = Theme.TextDim,
+		Parent = frame
+	})
+	
+	-- Dropdown list
+	local dropdownOpen = false
+	local dropdownList = Create("Frame", {
+		Size = UDim2.new(0, 0, 0, 0),
+		Position = UDim2.new(0.5, 0, 1, 5),
+		AnchorPoint = Vector2.new(0, 0),
+		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
+		Visible = false,
+		ZIndex = 100,
+		ClipsDescendants = true,
+		Parent = frame
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = dropdownList
+	})
+	
+	CreateStroke(dropdownList, Theme.Primary, 1)
+	CreateGlow(dropdownList, Theme.Primary, 0.6)
+	
+	local listLayout = Create("UIListLayout", {
+		Padding = UDim.new(0, 2),
+		Parent = dropdownList
+	})
+	
+	-- Create options
+	for _, option in ipairs(options) do
+		local optionBtn = Create("TextButton", {
+			Size = UDim2.new(1, -10, 0, 35),
+			Position = UDim2.fromOffset(5, 0),
+			BackgroundColor3 = option == default and Theme.ElementActive or Theme.ElementHover,
+			Text = option,
+			Font = Enum.Font.Gotham,
+			TextSize = 13,
+			TextColor3 = option == default and Theme.Primary or Theme.Text,
+			Parent = dropdownList
+		})
+		
+		Create("UICorner", {
+			CornerRadius = UDim.new(0, 4),
+			Parent = optionBtn
+		})
+		
+		optionBtn.MouseButton1Click:Connect(function()
+			self.Flags[flag] = option
+			valueLabel.Text = option
+			dropdownOpen = false
+			
+			Tween(dropdownList, {Size = UDim2.new(1, -10, 0, 0)}, 0.2)
+			wait(0.2)
+			dropdownList.Visible = false
+			Tween(arrow, {Rotation = 0}, 0.2)
+			
+			-- Update all option colors
+			for _, btn in ipairs(dropdownList:GetChildren()) do
+				if btn:IsA("TextButton") then
+					if btn.Text == option then
+						Tween(btn, {BackgroundColor3 = Theme.ElementActive, TextColor3 = Theme.Primary})
+					else
+						Tween(btn, {BackgroundColor3 = Theme.ElementHover, TextColor3 = Theme.Text})
+					end
+				end
+			end
+			
+			if callback then
+				callback(option)
+			end
+		end)
+		
+		optionBtn.MouseEnter:Connect(function()
+			if option ~= self.Flags[flag] then
+				Tween(optionBtn, {BackgroundColor3 = Theme.ElementActive})
+			end
+		end)
+		
+		optionBtn.MouseLeave:Connect(function()
+			if option ~= self.Flags[flag] then
+				Tween(optionBtn, {BackgroundColor3 = Theme.ElementHover})
+			end
+		end)
+	end
+	
+	-- Toggle dropdown
+	local button = Create("TextButton", {
+		Size = UDim2.new(1, 0, 1, 0),
+		BackgroundTransparency = 1,
+		Text = "",
+		ZIndex = 50,
+		Parent = frame
+	})
+	
+	button.MouseButton1Click:Connect(function()
+		dropdownOpen = not dropdownOpen
+		
+		if dropdownOpen then
+			dropdownList.Visible = true
+			local listHeight = math.min(#options * 37, 200)
+			Tween(dropdownList, {Size = UDim2.new(1, -10, 0, listHeight)}, 0.2)
+			Tween(arrow, {Rotation = 180}, 0.2)
+		else
+			Tween(dropdownList, {Size = UDim2.new(1, -10, 0, 0)}, 0.2)
+			Tween(arrow, {Rotation = 0}, 0.2)
+			wait(0.2)
+			dropdownList.Visible = false
+		end
+	end)
+	
+	frame.MouseEnter:Connect(function()
+		Tween(frame, {BackgroundColor3 = Theme.ElementHover})
+	end)
+	
+	frame.MouseLeave:Connect(function()
+		Tween(frame, {BackgroundColor3 = Theme.Element})
+	end)
+	
+	return frame
+end
+
+-- ========================================
+-- COMPONENT: KEYBIND
+-- ========================================
+
+function Elysium:CreateKeybind(parent, text, defaultKey, flag, callback)
+	defaultKey = defaultKey or Enum.KeyCode.E
+	self.Flags[flag] = defaultKey
+	
+	local frame = Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 45),
+		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
+		Parent = parent
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = frame
+	})
+	
+	-- Label
+	local label = Create("TextLabel", {
+		Size = UDim2.new(0.6, -20, 1, 0),
+		Position = UDim2.fromOffset(15, 0),
+		BackgroundTransparency = 1,
+		Text = text,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
+		TextColor3 = Theme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = frame
+	})
+	
+	-- Keybind button
+	local keybindBtn = Create("TextButton", {
+		Size = UDim2.new(0.4, -30, 0, 30),
+		Position = UDim2.new(0.6, 10, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = Theme.ElementHover,
+		Text = defaultKey.Name,
+		Font = Enum.Font.GothamBold,
+		TextSize = 12,
+		TextColor3 = Theme.Primary,
+		Parent = frame
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 4),
+		Parent = keybindBtn
+	})
+	
+	CreateStroke(keybindBtn, Theme.Primary, 1)
+	
+	local binding = false
+	
+	keybindBtn.MouseButton1Click:Connect(function()
+		binding = true
+		keybindBtn.Text = "..."
+		Tween(keybindBtn, {BackgroundColor3 = Theme.Primary, TextColor3 = Color3.fromRGB(255, 255, 255)})
+	end)
+	
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if binding and not gameProcessed then
+			if input.UserInputType == Enum.UserInputType.Keyboard then
+				binding = false
+				self.Flags[flag] = input.KeyCode
+				keybindBtn.Text = input.KeyCode.Name
+				Tween(keybindBtn, {BackgroundColor3 = Theme.ElementHover, TextColor3 = Theme.Primary})
+				
+				if callback then
+					callback(input.KeyCode)
+				end
+			end
+		end
+	end)
+	
+	frame.MouseEnter:Connect(function()
+		Tween(frame, {BackgroundColor3 = Theme.ElementHover})
+	end)
+	
+	frame.MouseLeave:Connect(function()
+		Tween(frame, {BackgroundColor3 = Theme.Element})
+	end)
+	
+	return frame
+end
+
+-- ========================================
+-- COMPONENT: TEXTBOX
+-- ========================================
+
+function Elysium:CreateTextBox(parent, text, placeholder, flag, callback)
+	self.Flags[flag] = ""
+	
+	local frame = Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 45),
+		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
+		Parent = parent
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = frame
+	})
+	
+	-- Label
+	local label = Create("TextLabel", {
+		Size = UDim2.new(0.4, -20, 1, 0),
+		Position = UDim2.fromOffset(15, 0),
+		BackgroundTransparency = 1,
+		Text = text,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
+		TextColor3 = Theme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = frame
+	})
+	
+	-- TextBox
+	local textBox = Create("TextBox", {
+		Size = UDim2.new(0.6, -30, 0, 30),
+		Position = UDim2.new(0.4, 10, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = Theme.ElementHover,
+		PlaceholderText = placeholder or "Enter text...",
+		PlaceholderColor3 = Theme.TextDark,
+		Text = "",
+		Font = Enum.Font.Gotham,
+		TextSize = 13,
+		TextColor3 = Theme.Text,
+		ClearTextOnFocus = false,
+		Parent = frame
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 4),
+		Parent = textBox
+	})
+	
+	textBox:GetPropertyChangedSignal("Text"):Connect(function()
+		self.Flags[flag] = textBox.Text
+		if callback then
+			callback(textBox.Text)
+		end
+	end)
+	
+	textBox.Focused:Connect(function()
+		CreateStroke(frame, Theme.Primary, 1)
+	end)
+	
+	textBox.FocusLost:Connect(function()
+		local stroke = frame:FindFirstChild("UIStroke")
+		if stroke then stroke:Destroy() end
+	end)
+	
+	frame.MouseEnter:Connect(function()
+		Tween(frame, {BackgroundColor3 = Theme.ElementHover})
+	end)
+	
+	frame.MouseLeave:Connect(function()
+		Tween(frame, {BackgroundColor3 = Theme.Element})
+	end)
+	
+	return textBox
+end
+
+-- ========================================
+-- COMPONENT: ENHANCED COLOR PICKER
+-- ========================================
+
 function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 	default = default or Color3.fromRGB(255, 0, 128)
 	self.Flags[flag] = default
 	
 	local frame = Create("Frame", {
-		Size = UDim2.new(1, -40, 0, 45),
+		Size = UDim2.new(1, -20, 0, 45),
 		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
 		Parent = parent
 	})
 	
 	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
+		CornerRadius = UDim.new(0, 6),
 		Parent = frame
 	})
 	
@@ -1129,10 +1541,10 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 		Parent = frame
 	})
 	
-	-- Color Display
+	-- Color Display Button
 	local colorDisplay = Create("TextButton", {
-		Size = UDim2.fromOffset(50, 30),
-		Position = UDim2.new(1, -65, 0.5, 0),
+		Size = UDim2.fromOffset(60, 30),
+		Position = UDim2.new(1, -70, 0.5, 0),
 		AnchorPoint = Vector2.new(0, 0.5),
 		BackgroundColor3 = default,
 		Text = "",
@@ -1144,31 +1556,47 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 		Parent = colorDisplay
 	})
 	
-	CreateGlow(colorDisplay, default, 8)
+	CreateGlow(colorDisplay, default, 0.5)
+	CreateStroke(colorDisplay, default, 2)
 	
 	-- Color Picker Popup
 	local pickerOpen = false
 	local picker = Create("Frame", {
-		Size = UDim2.fromOffset(220, 200),
-		Position = UDim2.new(0, frame.AbsolutePosition.X, 0, frame.AbsolutePosition.Y + 50),
-		BackgroundColor3 = Theme.Element,
+		Size = UDim2.fromOffset(280, 320),
+		Position = UDim2.new(0.5, -140, 0.5, -160),
+		AnchorPoint = Vector2.new(0, 0),
+		BackgroundColor3 = Theme.Sidebar,
 		BorderSizePixel = 0,
 		Visible = false,
-		ZIndex = 50,
+		ZIndex = 150,
 		Parent = self.ScreenGui
 	})
 	
 	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
+		CornerRadius = UDim.new(0, 8),
 		Parent = picker
 	})
 	
-	CreateGlow(picker, Theme.Primary, 15)
+	CreateGlow(picker, Theme.Primary, 0.8)
+	CreateStroke(picker, Theme.Primary, 2)
+	
+	-- Picker Title
+	local pickerTitle = Create("TextLabel", {
+		Size = UDim2.new(1, 0, 0, 35),
+		BackgroundTransparency = 1,
+		Text = "Color Picker",
+		Font = Enum.Font.GothamBold,
+		TextSize = 16,
+		TextColor3 = Theme.Primary,
+		Parent = picker
+	})
+	
+	CreateGradient(pickerTitle, Theme.HeaderGradient)
 	
 	-- Saturation/Value Box
 	local svBox = Create("ImageButton", {
-		Size = UDim2.fromOffset(180, 150),
-		Position = UDim2.fromOffset(10, 10),
+		Size = UDim2.fromOffset(220, 180),
+		Position = UDim2.fromOffset(10, 45),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BorderSizePixel = 0,
 		Image = "rbxassetid://4155801252",
@@ -1182,12 +1610,11 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 	
 	-- Hue Slider
 	local hueSlider = Create("ImageButton", {
-		Size = UDim2.fromOffset(20, 150),
-		Position = UDim2.fromOffset(195, 10),
+		Size = UDim2.fromOffset(30, 180),
+		Position = UDim2.fromOffset(240, 45),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BorderSizePixel = 0,
 		Image = "rbxassetid://3641079629",
-		ImageColor3 = Color3.fromRGB(255, 255, 255),
 		Parent = picker
 	})
 	
@@ -1198,11 +1625,11 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 	
 	-- Color Indicator
 	local indicator = Create("Frame", {
-		Size = UDim2.fromOffset(8, 8),
+		Size = UDim2.fromOffset(10, 10),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BorderSizePixel = 2,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
-		ZIndex = 51,
+		ZIndex = 151,
 		Parent = svBox
 	})
 	
@@ -1211,16 +1638,124 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 		Parent = indicator
 	})
 	
+	-- RGB Input Fields
+	local rgbFrame = Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 35),
+		Position = UDim2.fromOffset(10, 235),
+		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
+		Parent = picker
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 4),
+		Parent = rgbFrame
+	})
+	
+	local function createRGBInput(name, position)
+		local input = Create("TextBox", {
+			Size = UDim2.fromOffset(60, 25),
+			Position = position,
+			BackgroundColor3 = Theme.ElementHover,
+			PlaceholderText = name,
+			Text = "",
+			Font = Enum.Font.Gotham,
+			TextSize = 12,
+			TextColor3 = Theme.Text,
+			Parent = rgbFrame
+		})
+		
+		Create("UICorner", {
+			CornerRadius = UDim.new(0, 3),
+			Parent = input
+		})
+		
+		return input
+	end
+	
+	local rInput = createRGBInput("R", UDim2.fromOffset(10, 5))
+	local gInput = createRGBInput("G", UDim2.fromOffset(80, 5))
+	local bInput = createRGBInput("B", UDim2.fromOffset(150, 5))
+	
+	-- Hex Input
+	local hexInput = Create("TextBox", {
+		Size = UDim2.fromOffset(80, 25),
+		Position = UDim2.fromOffset(220, 5),
+		BackgroundColor3 = Theme.ElementHover,
+		PlaceholderText = "#HEX",
+		Text = "",
+		Font = Enum.Font.Gotham,
+		TextSize = 12,
+		TextColor3 = Theme.Text,
+		Parent = rgbFrame
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 3),
+		Parent = hexInput
+	})
+	
+	-- Close button
+	local closeBtn = Create("TextButton", {
+		Size = UDim2.fromOffset(100, 30),
+		Position = UDim2.new(0.5, -50, 1, -40),
+		BackgroundColor3 = Theme.Primary,
+		Text = "Done",
+		Font = Enum.Font.GothamBold,
+		TextSize = 13,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		Parent = picker
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 4),
+		Parent = closeBtn
+	})
+	
+	CreateGradient(closeBtn, Theme.HeaderGradient)
+	
+	closeBtn.MouseButton1Click:Connect(function()
+		pickerOpen = false
+		picker.Visible = false
+	end)
+	
 	local h, s, v = default:ToHSV()
 	
-	local function updateColor()
-		local color = Color3.fromHSV(h, s, v)
+	local function updateColor(fromRGB)
+		local color
+		if fromRGB then
+			color = Color3.fromRGB(
+				tonumber(rInput.Text) or 255,
+				tonumber(gInput.Text) or 0,
+				tonumber(bInput.Text) or 128
+			)
+			h, s, v = color:ToHSV()
+		else
+			color = Color3.fromHSV(h, s, v)
+		end
+		
 		self.Flags[flag] = color
 		colorDisplay.BackgroundColor3 = color
 		svBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
 		
+		-- Update RGB inputs
+		rInput.Text = tostring(math.floor(color.R * 255))
+		gInput.Text = tostring(math.floor(color.G * 255))
+		bInput.Text = tostring(math.floor(color.B * 255))
+		
+		-- Update hex
+		hexInput.Text = string.format("#%02X%02X%02X", 
+			math.floor(color.R * 255),
+			math.floor(color.G * 255),
+			math.floor(color.B * 255)
+		)
+		
+		-- Update glow
 		local glow = colorDisplay:FindFirstChild("Glow")
 		if glow then glow.ImageColor3 = color end
+		
+		local stroke = colorDisplay:FindFirstChild("UIStroke")
+		if stroke then stroke.Color = color end
 		
 		if callback then callback(color) end
 	end
@@ -1238,7 +1773,7 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 		local posY = math.clamp((input.Position.Y - svBox.AbsolutePosition.Y) / svBox.AbsoluteSize.Y, 0, 1)
 		s = posX
 		v = 1 - posY
-		indicator.Position = UDim2.new(posX, -4, posY, -4)
+		indicator.Position = UDim2.new(posX, -5, posY, -5)
 		updateColor()
 	end
 	
@@ -1275,14 +1810,36 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 		end
 	end)
 	
+	-- RGB input handling
+	for _, input in ipairs({rInput, gInput, bInput}) do
+		input.FocusLost:Connect(function()
+			updateColor(true)
+		end)
+	end
+	
+	-- Hex input handling
+	hexInput.FocusLost:Connect(function()
+		local hex = hexInput.Text:gsub("#", "")
+		if #hex == 6 then
+			local r = tonumber(hex:sub(1, 2), 16)
+			local g = tonumber(hex:sub(3, 4), 16)
+			local b = tonumber(hex:sub(5, 6), 16)
+			if r and g and b then
+				rInput.Text = tostring(r)
+				gInput.Text = tostring(g)
+				bInput.Text = tostring(b)
+				updateColor(true)
+			end
+		end
+	end)
+	
 	-- Toggle Picker
 	colorDisplay.MouseButton1Click:Connect(function()
 		pickerOpen = not pickerOpen
 		picker.Visible = pickerOpen
-		picker.Position = UDim2.fromOffset(
-			frame.AbsolutePosition.X - 220,
-			frame.AbsolutePosition.Y + 50
-		)
+		if pickerOpen then
+			updateColor()
+		end
 	end)
 	
 	frame.MouseEnter:Connect(function()
@@ -1296,23 +1853,408 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 	return frame
 end
 
--- Search Box
-function Elysium:CreateSearch(parent, placeholder, callback)
+-- ========================================
+-- COMPONENT: MULTI-DROPDOWN
+-- ========================================
+
+function Elysium:CreateMultiDropdown(parent, text, options, defaults, flag, callback)
+	defaults = defaults or {}
+	self.Flags[flag] = defaults
+	
 	local frame = Create("Frame", {
-		Size = UDim2.new(1, -40, 0, 45),
+		Size = UDim2.new(1, -20, 0, 45),
 		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
 		Parent = parent
 	})
 	
 	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
+		CornerRadius = UDim.new(0, 6),
 		Parent = frame
 	})
 	
+	-- Label
+	local label = Create("TextLabel", {
+		Size = UDim2.new(0.5, -20, 1, 0),
+		Position = UDim2.fromOffset(15, 0),
+		BackgroundTransparency = 1,
+		Text = text,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
+		TextColor3 = Theme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = frame
+	})
+	
+	-- Selected count
+	local countLabel = Create("TextLabel", {
+		Size = UDim2.new(0.5, -80, 0, 30),
+		Position = UDim2.new(0.5, 10, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = Theme.ElementHover,
+		Text = #defaults .. " selected",
+		Font = Enum.Font.Gotham,
+		TextSize = 13,
+		TextColor3 = Theme.Primary,
+		Parent = frame
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 4),
+		Parent = countLabel
+	})
+	
+	-- Arrow icon
+	local arrow = Create("TextLabel", {
+		Size = UDim2.fromOffset(20, 20),
+		Position = UDim2.new(1, -35, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundTransparency = 1,
+		Text = "▼",
+		Font = Enum.Font.GothamBold,
+		TextSize = 10,
+		TextColor3 = Theme.TextDim,
+		Parent = frame
+	})
+	
+	-- Dropdown list
+	local dropdownOpen = false
+	local dropdownList = Create("Frame", {
+		Size = UDim2.new(0, 0, 0, 0),
+		Position = UDim2.new(0.5, 0, 1, 5),
+		AnchorPoint = Vector2.new(0, 0),
+		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
+		Visible = false,
+		ZIndex = 100,
+		ClipsDescendants = true,
+		Parent = frame
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = dropdownList
+	})
+	
+	CreateStroke(dropdownList, Theme.Primary, 1)
+	CreateGlow(dropdownList, Theme.Primary, 0.6)
+	
+	Create("UIListLayout", {
+		Padding = UDim.new(0, 2),
+		Parent = dropdownList
+	})
+	
+	local function isSelected(option)
+		for _, selected in ipairs(self.Flags[flag]) do
+			if selected == option then
+				return true
+			end
+		end
+		return false
+	end
+	
+	local function updateCount()
+		countLabel.Text = #self.Flags[flag] .. " selected"
+	end
+	
+	-- Create options with checkboxes
+	for _, option in ipairs(options) do
+		local optionFrame = Create("Frame", {
+			Size = UDim2.new(1, -10, 0, 35),
+			Position = UDim2.fromOffset(5, 0),
+			BackgroundColor3 = Theme.ElementHover,
+			BorderSizePixel = 0,
+			Parent = dropdownList
+		})
+		
+		Create("UICorner", {
+			CornerRadius = UDim.new(0, 4),
+			Parent = optionFrame
+		})
+		
+		-- Checkbox
+		local checkbox = Create("Frame", {
+			Size = UDim2.fromOffset(18, 18),
+			Position = UDim2.fromOffset(10, 8.5),
+			BackgroundColor3 = isSelected(option) and Theme.Primary or Theme.ElementActive,
+			BorderSizePixel = 0,
+			Parent = optionFrame
+		})
+		
+		Create("UICorner", {
+			CornerRadius = UDim.new(0, 3),
+			Parent = checkbox
+		})
+		
+		if isSelected(option) then
+			local checkmark = Create("TextLabel", {
+				Size = UDim2.new(1, 0, 1, 0),
+				BackgroundTransparency = 1,
+				Text = "✓",
+				Font = Enum.Font.GothamBold,
+				TextSize = 14,
+				TextColor3 = Color3.fromRGB(255, 255, 255),
+				Parent = checkbox
+			})
+		end
+		
+		-- Option text
+		local optionText = Create("TextLabel", {
+			Size = UDim2.new(1, -40, 1, 0),
+			Position = UDim2.fromOffset(35, 0),
+			BackgroundTransparency = 1,
+			Text = option,
+			Font = Enum.Font.Gotham,
+			TextSize = 13,
+			TextColor3 = Theme.Text,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Parent = optionFrame
+		})
+		
+		local optionBtn = Create("TextButton", {
+			Size = UDim2.new(1, 0, 1, 0),
+			BackgroundTransparency = 1,
+			Text = "",
+			Parent = optionFrame
+		})
+		
+		optionBtn.MouseButton1Click:Connect(function()
+			if isSelected(option) then
+				-- Remove
+				for i, selected in ipairs(self.Flags[flag]) do
+					if selected == option then
+						table.remove(self.Flags[flag], i)
+						break
+					end
+				end
+				Tween(checkbox, {BackgroundColor3 = Theme.ElementActive})
+				local checkmark = checkbox:FindFirstChild("TextLabel")
+				if checkmark then checkmark:Destroy() end
+			else
+				-- Add
+				table.insert(self.Flags[flag], option)
+				Tween(checkbox, {BackgroundColor3 = Theme.Primary})
+				Create("TextLabel", {
+					Size = UDim2.new(1, 0, 1, 0),
+					BackgroundTransparency = 1,
+					Text = "✓",
+					Font = Enum.Font.GothamBold,
+					TextSize = 14,
+					TextColor3 = Color3.fromRGB(255, 255, 255),
+					Parent = checkbox
+				})
+			end
+			
+			updateCount()
+			
+			if callback then
+				callback(self.Flags[flag])
+			end
+		end)
+		
+		optionBtn.MouseEnter:Connect(function()
+			Tween(optionFrame, {BackgroundColor3 = Theme.ElementActive})
+		end)
+		
+		optionBtn.MouseLeave:Connect(function()
+			Tween(optionFrame, {BackgroundColor3 = Theme.ElementHover})
+		end)
+	end
+	
+	-- Toggle dropdown
+	local button = Create("TextButton", {
+		Size = UDim2.new(1, 0, 1, 0),
+		BackgroundTransparency = 1,
+		Text = "",
+		ZIndex = 50,
+		Parent = frame
+	})
+	
+	button.MouseButton1Click:Connect(function()
+		dropdownOpen = not dropdownOpen
+		
+		if dropdownOpen then
+			dropdownList.Visible = true
+			local listHeight = math.min(#options * 37, 200)
+			Tween(dropdownList, {Size = UDim2.new(1, -10, 0, listHeight)}, 0.2)
+			Tween(arrow, {Rotation = 180}, 0.2)
+		else
+			Tween(dropdownList, {Size = UDim2.new(1, -10, 0, 0)}, 0.2)
+			Tween(arrow, {Rotation = 0}, 0.2)
+			wait(0.2)
+			dropdownList.Visible = false
+		end
+	end)
+	
+	frame.MouseEnter:Connect(function()
+		Tween(frame, {BackgroundColor3 = Theme.ElementHover})
+	end)
+	
+	frame.MouseLeave:Connect(function()
+		Tween(frame, {BackgroundColor3 = Theme.Element})
+	end)
+	
+	return frame
+end
+
+-- ========================================
+-- NOTIFICATION SYSTEM
+-- ========================================
+
+function Elysium:Notify(title, message, type, duration)
+	type = type or "info"
+	duration = duration or 3
+	
+	local typeColors = {
+		info = Theme.Primary,
+		success = Theme.Success,
+		warning = Theme.Warning,
+		error = Theme.Error
+	}
+	
+	local color = typeColors[type] or Theme.Primary
+	
+	local notification = Create("Frame", {
+		Size = UDim2.fromOffset(330, 0),
+		BackgroundColor3 = Theme.Sidebar,
+		BorderSizePixel = 0,
+		ClipsDescendants = true,
+		Parent = self.NotificationContainer
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = notification
+	})
+	
+	CreateGlow(notification, color, 0.7)
+	CreateStroke(notification, color, 2)
+	
+	-- Left accent bar
+	local accentBar = Create("Frame", {
+		Size = UDim2.new(0, 4, 1, 0),
+		BackgroundColor3 = color,
+		BorderSizePixel = 0,
+		Parent = notification
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = accentBar
+	})
+	
+	-- Title
+	local titleLabel = Create("TextLabel", {
+		Size = UDim2.new(1, -60, 0, 20),
+		Position = UDim2.fromOffset(15, 8),
+		BackgroundTransparency = 1,
+		Text = title,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
+		TextColor3 = color,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = notification
+	})
+	
+	-- Message
+	local messageLabel = Create("TextLabel", {
+		Size = UDim2.new(1, -60, 0, 16),
+		Position = UDim2.fromOffset(15, 28),
+		BackgroundTransparency = 1,
+		Text = message,
+		Font = Enum.Font.Gotham,
+		TextSize = 12,
+		TextColor3 = Theme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextWrapped = true,
+		Parent = notification
+	})
+	
+	-- Close button
+	local closeBtn = Create("TextButton", {
+		Size = UDim2.fromOffset(24, 24),
+		Position = UDim2.new(1, -32, 0, 8),
+		BackgroundColor3 = Theme.Element,
+		Text = "×",
+		Font = Enum.Font.GothamBold,
+		TextSize = 16,
+		TextColor3 = Theme.TextDim,
+		Parent = notification
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 4),
+		Parent = closeBtn
+	})
+	
+	-- Progress bar
+	local progressBg = Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 3),
+		Position = UDim2.new(0, 10, 1, -8),
+		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
+		Parent = notification
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(1, 0),
+		Parent = progressBg
+	})
+	
+	local progressFill = Create("Frame", {
+		Size = UDim2.new(1, 0, 1, 0),
+		BackgroundColor3 = color,
+		BorderSizePixel = 0,
+		Parent = progressBg
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(1, 0),
+		Parent = progressFill
+	})
+	
+	-- Animate in
+	Tween(notification, {Size = UDim2.fromOffset(330, 55)}, 0.3, Enum.EasingStyle.Back)
+	
+	-- Progress animation
+	Tween(progressFill, {Size = UDim2.new(0, 0, 1, 0)}, duration, Enum.EasingStyle.Linear)
+	
+	-- Close button functionality
+	local function closeNotification()
+		Tween(notification, {Size = UDim2.fromOffset(330, 0)}, 0.2)
+		wait(0.2)
+		notification:Destroy()
+	end
+	
+	closeBtn.MouseButton1Click:Connect(closeNotification)
+	
+	-- Auto close
+	delay(duration, closeNotification)
+end
+
+-- ========================================
+-- SEARCH COMPONENT
+-- ========================================
+
+function Elysium:CreateSearch(parent, placeholder, callback)
+	local frame = Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 50),
+		BackgroundColor3 = Theme.Element,
+		BorderSizePixel = 0,
+		Parent = parent
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 6),
+		Parent = frame
+	})
+	
+	CreateStroke(frame, Theme.Primary, 1)
+	
 	-- Search Icon
 	local icon = Create("ImageLabel", {
-		Size = UDim2.fromOffset(20, 20),
-		Position = UDim2.fromOffset(15, 12.5),
+		Size = UDim2.fromOffset(24, 24),
+		Position = UDim2.fromOffset(15, 13),
 		BackgroundTransparency = 1,
 		Image = "rbxassetid://3926305904",
 		ImageRectOffset = Vector2.new(964, 324),
@@ -1323,14 +2265,14 @@ function Elysium:CreateSearch(parent, placeholder, callback)
 	
 	-- Text Box
 	local textBox = Create("TextBox", {
-		Size = UDim2.new(1, -90, 1, 0),
-		Position = UDim2.fromOffset(45, 0),
+		Size = UDim2.new(1, -100, 1, 0),
+		Position = UDim2.fromOffset(50, 0),
 		BackgroundTransparency = 1,
 		PlaceholderText = placeholder or "Search...",
 		PlaceholderColor3 = Theme.TextDark,
 		Text = "",
-		Font = Enum.Font.Gotham,
-		TextSize = 14,
+		Font = Enum.Font.GothamBold,
+		TextSize = 15,
 		TextColor3 = Theme.Text,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		ClearTextOnFocus = false,
@@ -1339,16 +2281,21 @@ function Elysium:CreateSearch(parent, placeholder, callback)
 	
 	-- Clear Button
 	local clearBtn = Create("TextButton", {
-		Size = UDim2.fromOffset(30, 30),
-		Position = UDim2.new(1, -40, 0.5, 0),
+		Size = UDim2.fromOffset(35, 35),
+		Position = UDim2.new(1, -45, 0.5, 0),
 		AnchorPoint = Vector2.new(0, 0.5),
-		BackgroundTransparency = 1,
+		BackgroundColor3 = Theme.ElementHover,
 		Text = "×",
 		Font = Enum.Font.GothamBold,
-		TextSize = 20,
+		TextSize = 18,
 		TextColor3 = Theme.TextDim,
 		Visible = false,
 		Parent = frame
+	})
+	
+	Create("UICorner", {
+		CornerRadius = UDim.new(0, 4),
+		Parent = clearBtn
 	})
 	
 	textBox:GetPropertyChangedSignal("Text"):Connect(function()
@@ -1361,56 +2308,54 @@ function Elysium:CreateSearch(parent, placeholder, callback)
 	end)
 	
 	clearBtn.MouseEnter:Connect(function()
-		Tween(clearBtn, {TextColor3 = Theme.Primary})
+		Tween(clearBtn, {BackgroundColor3 = Theme.Error, TextColor3 = Color3.fromRGB(255, 255, 255)})
 	end)
 	
 	clearBtn.MouseLeave:Connect(function()
-		Tween(clearBtn, {TextColor3 = Theme.TextDim})
+		Tween(clearBtn, {BackgroundColor3 = Theme.ElementHover, TextColor3 = Theme.TextDim})
 	end)
 	
-	frame.MouseEnter:Connect(function()
-		Tween(frame, {BackgroundColor3 = Theme.ElementHover})
+	textBox.Focused:Connect(function()
+		CreateGlow(frame, Theme.Primary, 0.6)
 	end)
 	
-	frame.MouseLeave:Connect(function()
-		Tween(frame, {BackgroundColor3 = Theme.Element})
+	textBox.FocusLost:Connect(function()
+		local glow = frame:FindFirstChild("Glow")
+		if glow then glow:Destroy() end
 	end)
 	
 	return textBox
 end
 
--- Player List
+-- ========================================
+-- PLAYER LIST COMPONENT
+-- ========================================
+
 function Elysium:CreatePlayerList(parent)
-	local frame = Create("Frame", {
-		Size = UDim2.new(1, -40, 1, -20),
-		BackgroundColor3 = Theme.Element,
+	local container = Create("Frame", {
+		Size = UDim2.new(1, -20, 1, -70),
+		BackgroundTransparency = 1,
 		Parent = parent
 	})
 	
-	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
-		Parent = frame
-	})
-	
 	-- Search
-	local searchBox = self:CreateSearch(frame, "Search players...")
-	searchBox.Parent.Size = UDim2.new(1, -20, 0, 40)
-	searchBox.Parent.Position = UDim2.fromOffset(10, 10)
+	local searchBox = self:CreateSearch(container, "Search players...")
 	
-	-- Player List
+	-- Player List Frame
 	local listFrame = Create("ScrollingFrame", {
-		Size = UDim2.new(1, -20, 1, -65),
-		Position = UDim2.fromOffset(10, 55),
+		Size = UDim2.new(1, 0, 1, -60),
+		Position = UDim2.fromOffset(0, 60),
 		BackgroundTransparency = 1,
-		ScrollBarThickness = 3,
+		BorderSizePixel = 0,
+		ScrollBarThickness = 4,
 		ScrollBarImageColor3 = Theme.Primary,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		Parent = frame
+		Parent = container
 	})
 	
-	local listLayout = Create("UIListLayout", {
-		Padding = UDim.new(0, 4),
+	Create("UIListLayout", {
+		Padding = UDim.new(0, 8),
 		SortOrder = Enum.SortOrder.Name,
 		Parent = listFrame
 	})
@@ -1418,38 +2363,43 @@ function Elysium:CreatePlayerList(parent)
 	local function createPlayerEntry(player)
 		local entry = Create("Frame", {
 			Name = player.Name,
-			Size = UDim2.new(1, -10, 0, 50),
-			BackgroundColor3 = Theme.Background,
+			Size = UDim2.new(1, -10, 0, 70),
+			BackgroundColor3 = Theme.Element,
+			BorderSizePixel = 0,
 			Parent = listFrame
 		})
 		
 		Create("UICorner", {
-			CornerRadius = UDim.new(0, 4),
+			CornerRadius = UDim.new(0, 6),
 			Parent = entry
 		})
 		
+		CreateStroke(entry, Theme.Primary, 1)
+		
 		-- Avatar
 		local avatar = Create("ImageLabel", {
-			Size = UDim2.fromOffset(40, 40),
-			Position = UDim2.fromOffset(5, 5),
-			BackgroundColor3 = Theme.Element,
+			Size = UDim2.fromOffset(50, 50),
+			Position = UDim2.fromOffset(10, 10),
+			BackgroundColor3 = Theme.ElementHover,
 			Image = Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48),
 			Parent = entry
 		})
 		
 		Create("UICorner", {
-			CornerRadius = UDim.new(0, 4),
+			CornerRadius = UDim.new(0, 6),
 			Parent = avatar
 		})
 		
+		CreateStroke(avatar, Theme.Primary, 2)
+		
 		-- Name
 		local nameLabel = Create("TextLabel", {
-			Size = UDim2.new(1, -130, 0, 20),
-			Position = UDim2.fromOffset(50, 5),
+			Size = UDim2.new(1, -180, 0, 22),
+			Position = UDim2.fromOffset(70, 12),
 			BackgroundTransparency = 1,
 			Text = player.Name,
 			Font = Enum.Font.GothamBold,
-			TextSize = 13,
+			TextSize = 14,
 			TextColor3 = Theme.Text,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextTruncate = Enum.TextTruncate.AtEnd,
@@ -1458,12 +2408,12 @@ function Elysium:CreatePlayerList(parent)
 		
 		-- Display Name
 		local displayLabel = Create("TextLabel", {
-			Size = UDim2.new(1, -130, 0, 18),
-			Position = UDim2.fromOffset(50, 25),
+			Size = UDim2.new(1, -180, 0, 18),
+			Position = UDim2.fromOffset(70, 36),
 			BackgroundTransparency = 1,
 			Text = "@" .. player.DisplayName,
 			Font = Enum.Font.Gotham,
-			TextSize = 11,
+			TextSize = 12,
 			TextColor3 = Theme.TextDim,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextTruncate = Enum.TextTruncate.AtEnd,
@@ -1471,35 +2421,55 @@ function Elysium:CreatePlayerList(parent)
 		})
 		
 		-- Actions
-		local teleportBtn = Create("TextButton", {
-			Size = UDim2.fromOffset(60, 35),
-			Position = UDim2.new(1, -70, 0.5, 0),
-			AnchorPoint = Vector2.new(0, 0.5),
-			BackgroundColor3 = Theme.Primary,
-			Text = "TP",
-			Font = Enum.Font.GothamBold,
-			TextSize = 12,
-			TextColor3 = Color3.fromRGB(255, 255, 255),
-			Parent = entry
-		})
+		local function createActionBtn(text, position, color, callback)
+			local btn = Create("TextButton", {
+				Size = UDim2.fromOffset(70, 30),
+				Position = position,
+				AnchorPoint = Vector2.new(0, 0.5),
+				BackgroundColor3 = color,
+				Text = text,
+				Font = Enum.Font.GothamBold,
+				TextSize = 12,
+				TextColor3 = Color3.fromRGB(255, 255, 255),
+				Parent = entry
+			})
+			
+			Create("UICorner", {
+				CornerRadius = UDim.new(0, 4),
+				Parent = btn
+			})
+			
+			CreateGlow(btn, color, 0.5)
+			
+			btn.MouseButton1Click:Connect(callback)
+			
+			btn.MouseEnter:Connect(function()
+				Tween(btn, {BackgroundColor3 = Theme.Secondary})
+			end)
+			
+			btn.MouseLeave:Connect(function()
+				Tween(btn, {BackgroundColor3 = color})
+			end)
+			
+			return btn
+		end
 		
-		Create("UICorner", {
-			CornerRadius = UDim.new(0, 4),
-			Parent = teleportBtn
-		})
-		
-		teleportBtn.MouseEnter:Connect(function()
-			Tween(teleportBtn, {BackgroundColor3 = Theme.Secondary})
-		end)
-		
-		teleportBtn.MouseLeave:Connect(function()
-			Tween(teleportBtn, {BackgroundColor3 = Theme.Primary})
-		end)
-		
-		teleportBtn.MouseButton1Click:Connect(function()
+		createActionBtn("TP", UDim2.new(1, -155, 0.5, 0), Theme.Primary, function()
 			if player.Character and LocalPlayer.Character then
 				LocalPlayer.Character:SetPrimaryPartCFrame(player.Character.PrimaryPart.CFrame)
 			end
+		end)
+		
+		createActionBtn("View", UDim2.new(1, -80, 0.5, 0), Theme.Secondary, function()
+			workspace.CurrentCamera.CameraSubject = player.Character and player.Character:FindFirstChild("Humanoid")
+		end)
+		
+		entry.MouseEnter:Connect(function()
+			Tween(entry, {BackgroundColor3 = Theme.ElementHover})
+		end)
+		
+		entry.MouseLeave:Connect(function()
+			Tween(entry, {BackgroundColor3 = Theme.Element})
 		end)
 		
 		return entry
@@ -1531,180 +2501,13 @@ function Elysium:CreatePlayerList(parent)
 		end
 	end)
 	
-	return frame
+	return container
 end
 
--- Tooltip System
-function Elysium:ShowTooltip(text, parent)
-	if not text then return end
-	self.TooltipText.Text = text
-	self.Tooltip.Size = UDim2.fromOffset(200, 0)
-	
-	-- Measure text
-	local textBounds = game:GetService("TextService"):GetTextSize(
-		text, 12, Enum.Font.Gotham, Vector2.new(180, 1000)
-	)
-	
-	self.Tooltip.Size = UDim2.fromOffset(200, textBounds.Y + 20)
-	self.Tooltip.Visible = true
-	
-	-- Position near mouse or parent
-	local pos = parent.AbsolutePosition
-	self.Tooltip.Position = UDim2.fromOffset(pos.X + parent.AbsoluteSize.X + 10, pos.Y)
-end
+-- ========================================
+-- CONFIG SYSTEM
+-- ========================================
 
-function Elysium:HideTooltip()
-	self.Tooltip.Visible = false
-end
-
--- Window Controls
-function Elysium:Toggle(state)
-	self.Open = state
-	self.MainFrame.Visible = true
-	
-	if state then
-		Tween(self.MainFrame, {Size = UDim2.fromOffset(900, 600)}, 0.3, Enum.EasingStyle.Back)
-	else
-		Tween(self.MainFrame, {Size = UDim2.fromOffset(900, 0)}, 0.2).Completed:Connect(function()
-			if not self.Open then
-				self.MainFrame.Visible = false
-			end
-		end)
-	end
-end
-
--- Input Handling
-function Elysium:SetupInput()
-	UserInputService.InputBegan:Connect(function(input, gameProcessed)
-		if gameProcessed then return end
-		
-		if input.KeyCode == Enum.KeyCode.Insert then
-			self:Toggle(not self.Open)
-		elseif input.KeyCode == Enum.KeyCode.Delete then
-			self.ScreenGui:Destroy()
-		end
-	end)
-	
-	-- Dragging
-	local dragging = false
-	local dragStart = nil
-	local startPos = nil
-	
-	self.Header.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = true
-			dragStart = input.Position
-			startPos = self.MainFrame.Position
-		end
-	end)
-	
-	UserInputService.InputChanged:Connect(function(input)
-		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-			local delta = input.Position - dragStart
-			self.MainFrame.Position = UDim2.new(
-				startPos.X.Scale,
-				startPos.X.Offset + delta.X,
-				startPos.Y.Scale,
-				startPos.Y.Offset + delta.Y
-			)
-		end
-	end)
-	
-	UserInputService.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = false
-		end
-	end)
-end
-
--- Notification System
-function Elysium:Notify(title, message, type, duration)
-	type = type or "info"
-	duration = duration or 3
-	
-	local colors = {
-		info = Theme.Primary,
-		success = Color3.fromRGB(0, 255, 128),
-		warning = Color3.fromRGB(255, 200, 0),
-		error = Color3.fromRGB(255, 50, 50)
-	}
-	
-	local notif = Create("Frame", {
-		Size = UDim2.fromOffset(300, 80),
-		Position = UDim2.new(1, 320, 1, -100),
-		BackgroundColor3 = Theme.Element,
-		BorderSizePixel = 0,
-		Parent = self.ScreenGui
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(0, 4),
-		Parent = notif
-	})
-	
-	CreateGlow(notif, colors[type], 15)
-	
-	-- Accent line
-	local accent = Create("Frame", {
-		Size = UDim2.new(0, 3, 0.8, 0),
-		Position = UDim2.fromOffset(0, 0.1),
-		BackgroundColor3 = colors[type],
-		BorderSizePixel = 0,
-		Parent = notif
-	})
-	
-	Create("UICorner", {
-		CornerRadius = UDim.new(1, 0),
-		Parent = accent
-	})
-	
-	local titleLabel = Create("TextLabel", {
-		Size = UDim2.new(1, -30, 0, 25),
-		Position = UDim2.fromOffset(15, 8),
-		BackgroundTransparency = 1,
-		Text = title,
-		Font = Enum.Font.GothamBlack,
-		TextSize = 16,
-		TextColor3 = Theme.Text,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = notif
-	})
-	
-	local msgLabel = Create("TextLabel", {
-		Size = UDim2.new(1, -30, 0, 40),
-		Position = UDim2.fromOffset(15, 35),
-		BackgroundTransparency = 1,
-		Text = message,
-		Font = Enum.Font.Gotham,
-		TextSize = 12,
-		TextColor3 = Theme.TextDim,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextWrapped = true,
-		Parent = notif
-	})
-	
-	-- Slide in
-	Tween(notif, {Position = UDim2.new(1, -320, 1, -100)}, 0.3, Enum.EasingStyle.Back)
-	
-	-- Progress bar
-	local progress = Create("Frame", {
-		Size = UDim2.new(1, 0, 0, 2),
-		Position = UDim2.new(0, 0, 1, -2),
-		BackgroundColor3 = colors[type],
-		BorderSizePixel = 0,
-		Parent = notif
-	})
-	
-	Tween(progress, {Size = UDim2.new(0, 0, 0, 2)}, duration)
-	
-	task.delay(duration, function()
-		Tween(notif, {Position = UDim2.new(1, 320, 1, -100)}, 0.3).Completed:Connect(function()
-			notif:Destroy()
-		end)
-	end)
-end
-
--- Config System
 function Elysium:SaveConfig(name)
 	local config = {}
 	for flag, value in pairs(self.Flags) do
@@ -1712,11 +2515,13 @@ function Elysium:SaveConfig(name)
 			config[flag] = {r = value.R, g = value.G, b = value.B}
 		elseif typeof(value) == "EnumItem" then
 			config[flag] = tostring(value)
+		elseif typeof(value) == "table" then
+			config[flag] = value
 		else
 			config[flag] = value
 		end
 	end
-	print("[Elysium] Config saved:", name)
+	print("[ELYSIUM] Config saved:", name)
 	return HttpService:JSONEncode(config)
 end
 
@@ -1726,7 +2531,7 @@ function Elysium:LoadConfig(configString)
 	end)
 	
 	if not success then
-		warn("[Elysium] Failed to load config")
+		warn("[ELYSIUM] Failed to load config")
 		return
 	end
 	
@@ -1737,325 +2542,7 @@ function Elysium:LoadConfig(configString)
 			self.Flags[flag] = value
 		end
 	end
-	print("[Elysium] Config loaded successfully")
-end
-
--- ========================================
--- UTILITY LIBRARIES
--- ========================================
-
--- Math Library
-Elysium.Math = {}
-
-function Elysium.Math:WorldToScreen(position)
-	local camera = workspace.CurrentCamera
-	local screenPos, onScreen = camera:WorldToViewportPoint(position)
-	return Vector2.new(screenPos.X, screenPos.Y), onScreen, screenPos.Z
-end
-
-function Elysium.Math:GetDistance(from, to)
-	if typeof(from) == "Instance" then
-		from = from.Position
-	end
-	if typeof(to) == "Instance" then
-		to = to.Position
-	end
-	return (from - to).Magnitude
-end
-
-function Elysium.Math:GetClosestPlayer(maxDistance)
-	maxDistance = maxDistance or math.huge
-	local closestPlayer = nil
-	local shortestDistance = maxDistance
-	
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer and player.Character then
-			local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
-			if humanoidRootPart and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-				local distance = self:GetDistance(LocalPlayer.Character.HumanoidRootPart.Position, humanoidRootPart.Position)
-				if distance < shortestDistance then
-					shortestDistance = distance
-					closestPlayer = player
-				end
-			end
-		end
-	end
-	
-	return closestPlayer, shortestDistance
-end
-
-function Elysium.Math:GetClosestPlayerToMouse(maxDistance, fov)
-	maxDistance = maxDistance or math.huge
-	fov = fov or 360
-	local closestPlayer = nil
-	local shortestDistance = maxDistance
-	local mousePos = UserInputService:GetMouseLocation()
-	
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer and player.Character then
-			local head = player.Character:FindFirstChild("Head")
-			if head then
-				local screenPos, onScreen = self:WorldToScreen(head.Position)
-				if onScreen then
-					local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-					if distance < shortestDistance and distance <= fov then
-						shortestDistance = distance
-						closestPlayer = player
-					end
-				end
-			end
-		end
-	end
-	
-	return closestPlayer, shortestDistance
-end
-
-function Elysium.Math:CalculateLeadPosition(targetPosition, targetVelocity, projectileSpeed)
-	local distance = self:GetDistance(LocalPlayer.Character.HumanoidRootPart.Position, targetPosition)
-	local timeToHit = distance / projectileSpeed
-	return targetPosition + (targetVelocity * timeToHit)
-end
-
-function Elysium.Math:PredictPosition(character, predictionAmount)
-	predictionAmount = predictionAmount or 0.1
-	local rootPart = character:FindFirstChild("HumanoidRootPart")
-	if rootPart then
-		local velocity = rootPart.AssemblyLinearVelocity or rootPart.Velocity
-		return rootPart.Position + (velocity * predictionAmount)
-	end
-	return nil
-end
-
--- Wallcheck/Raycast Library
-Elysium.Wallcheck = {}
-
-function Elysium.Wallcheck:IsVisible(targetPosition, ignoreList)
-	if not LocalPlayer.Character then return false end
-	
-	local camera = workspace.CurrentCamera
-	local origin = camera.CFrame.Position
-	
-	ignoreList = ignoreList or {LocalPlayer.Character, camera}
-	
-	local raycastParams = RaycastParams.new()
-	raycastParams.FilterDescendantsInstances = ignoreList
-	raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-	raycastParams.IgnoreWater = true
-	
-	local direction = (targetPosition - origin)
-	local raycastResult = workspace:Raycast(origin, direction, raycastParams)
-	
-	return raycastResult == nil or raycastResult.Distance >= direction.Magnitude - 0.5
-end
-
-function Elysium.Wallcheck:IsPlayerVisible(player)
-	if not player.Character then return false end
-	
-	local head = player.Character:FindFirstChild("Head")
-	local torso = player.Character:FindFirstChild("HumanoidRootPart")
-	
-	if head and self:IsVisible(head.Position, {LocalPlayer.Character, player.Character}) then
-		return true
-	end
-	
-	if torso and self:IsVisible(torso.Position, {LocalPlayer.Character, player.Character}) then
-		return true
-	end
-	
-	return false
-end
-
-function Elysium.Wallcheck:GetVisiblePlayers()
-	local visiblePlayers = {}
-	
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer and self:IsPlayerVisible(player) then
-			table.insert(visiblePlayers, player)
-		end
-	end
-	
-	return visiblePlayers
-end
-
-function Elysium.Wallcheck:CanHit(origin, target, ignoreList)
-	ignoreList = ignoreList or {LocalPlayer.Character}
-	
-	local raycastParams = RaycastParams.new()
-	raycastParams.FilterDescendantsInstances = ignoreList
-	raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-	raycastParams.IgnoreWater = true
-	
-	local direction = (target - origin)
-	local raycastResult = workspace:Raycast(origin, direction, raycastParams)
-	
-	return raycastResult ~= nil, raycastResult
-end
-
--- ESP/Drawing Library
-Elysium.ESP = {}
-Elysium.ESP.Objects = {}
-
-function Elysium.ESP:CreateBox(player)
-	local box = {
-		Player = player,
-		Drawings = {}
-	}
-	
-	-- Create 4 lines for box outline
-	for i = 1, 4 do
-		local line = Drawing.new("Line")
-		line.Thickness = 2
-		line.Color = Color3.fromRGB(255, 0, 128)
-		line.Visible = false
-		table.insert(box.Drawings, line)
-	end
-	
-	-- Name text
-	local nameText = Drawing.new("Text")
-	nameText.Size = 14
-	nameText.Center = true
-	nameText.Outline = true
-	nameText.Color = Color3.fromRGB(255, 255, 255)
-	nameText.Visible = false
-	nameText.Text = player.Name
-	box.NameText = nameText
-	
-	-- Distance text
-	local distText = Drawing.new("Text")
-	distText.Size = 12
-	distText.Center = true
-	distText.Outline = true
-	distText.Color = Color3.fromRGB(200, 200, 200)
-	distText.Visible = false
-	box.DistText = distText
-	
-	-- Health bar
-	local healthBar = Drawing.new("Line")
-	healthBar.Thickness = 3
-	healthBar.Color = Color3.fromRGB(0, 255, 0)
-	healthBar.Visible = false
-	box.HealthBar = healthBar
-	
-	self.Objects[player] = box
-	return box
-end
-
-function Elysium.ESP:UpdateBox(box)
-	local player = box.Player
-	if not player or not player.Character then
-		self:RemoveBox(player)
-		return
-	end
-	
-	local character = player.Character
-	local rootPart = character:FindFirstChild("HumanoidRootPart")
-	local humanoid = character:FindFirstChild("Humanoid")
-	
-	if not rootPart or not humanoid then
-		self:RemoveBox(player)
-		return
-	end
-	
-	local camera = workspace.CurrentCamera
-	local rootPos = rootPart.Position
-	local headOffset = Vector3.new(0, 2, 0)
-	local legOffset = Vector3.new(0, -3, 0)
-	
-	local topPos, topOnScreen = Elysium.Math:WorldToScreen(rootPos + headOffset)
-	local bottomPos, bottomOnScreen = Elysium.Math:WorldToScreen(rootPos + legOffset)
-	
-	if topOnScreen and bottomOnScreen then
-		local height = (bottomPos - topPos).Y
-		local width = height / 2
-		
-		-- Update box lines
-		local lines = box.Drawings
-		lines[1].From = Vector2.new(topPos.X - width/2, topPos.Y)
-		lines[1].To = Vector2.new(topPos.X + width/2, topPos.Y)
-		lines[1].Visible = true
-		
-		lines[2].From = Vector2.new(topPos.X + width/2, topPos.Y)
-		lines[2].To = Vector2.new(bottomPos.X + width/2, bottomPos.Y)
-		lines[2].Visible = true
-		
-		lines[3].From = Vector2.new(bottomPos.X + width/2, bottomPos.Y)
-		lines[3].To = Vector2.new(bottomPos.X - width/2, bottomPos.Y)
-		lines[3].Visible = true
-		
-		lines[4].From = Vector2.new(bottomPos.X - width/2, bottomPos.Y)
-		lines[4].To = Vector2.new(topPos.X - width/2, topPos.Y)
-		lines[4].Visible = true
-		
-		-- Update name
-		box.NameText.Position = Vector2.new(topPos.X, topPos.Y - 20)
-		box.NameText.Visible = true
-		
-		-- Update distance
-		if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-			local distance = Elysium.Math:GetDistance(LocalPlayer.Character.HumanoidRootPart.Position, rootPos)
-			box.DistText.Text = string.format("%.0f studs", distance)
-			box.DistText.Position = Vector2.new(bottomPos.X, bottomPos.Y + 5)
-			box.DistText.Visible = true
-		end
-		
-		-- Update health bar
-		local healthPercent = humanoid.Health / humanoid.MaxHealth
-		box.HealthBar.From = Vector2.new(topPos.X - width/2 - 6, topPos.Y)
-		box.HealthBar.To = Vector2.new(topPos.X - width/2 - 6, topPos.Y + (height * healthPercent))
-		box.HealthBar.Color = Color3.fromRGB(255 * (1 - healthPercent), 255 * healthPercent, 0)
-		box.HealthBar.Visible = true
-	else
-		-- Hide if not on screen
-		for _, line in ipairs(box.Drawings) do
-			line.Visible = false
-		end
-		box.NameText.Visible = false
-		box.DistText.Visible = false
-		box.HealthBar.Visible = false
-	end
-end
-
-function Elysium.ESP:RemoveBox(player)
-	local box = self.Objects[player]
-	if box then
-		for _, drawing in ipairs(box.Drawings) do
-			drawing:Remove()
-		end
-		if box.NameText then box.NameText:Remove() end
-		if box.DistText then box.DistText:Remove() end
-		if box.HealthBar then box.HealthBar:Remove() end
-		self.Objects[player] = nil
-	end
-end
-
-function Elysium.ESP:EnableAll()
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer then
-			if not self.Objects[player] then
-				self:CreateBox(player)
-			end
-		end
-	end
-	
-	Players.PlayerAdded:Connect(function(player)
-		self:CreateBox(player)
-	end)
-	
-	Players.PlayerRemoving:Connect(function(player)
-		self:RemoveBox(player)
-	end)
-	
-	RunService.RenderStepped:Connect(function()
-		for player, box in pairs(self.Objects) do
-			self:UpdateBox(box)
-		end
-	end)
-end
-
-function Elysium.ESP:DisableAll()
-	for player, _ in pairs(self.Objects) do
-		self:RemoveBox(player)
-	end
+	print("[ELYSIUM] Config loaded successfully")
 end
 
 return Elysium
