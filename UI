@@ -1,0 +1,214 @@
+-- elysium.wtf core v0.3
+
+local elysium = {}
+elysium.ui = {}
+elysium.flags = {}
+elysium.binds = {}
+elysium.theme = {
+	accent = Color3.fromRGB(120, 60, 255),
+	background = Color3.fromRGB(20, 20, 20),
+	panel = Color3.fromRGB(26, 26, 26),
+	text = Color3.fromRGB(210, 210, 210)
+}
+
+local services = {
+	players = game:GetService("Players"),
+	input = game:GetService("UserInputService"),
+	run = game:GetService("RunService"),
+	camera = workspace.CurrentCamera
+}
+
+local local_player = services.players.LocalPlayer
+
+-- ui base
+local gui = Instance.new("ScreenGui")
+gui.Name = "elysium"
+gui.ResetOnSpawn = false
+gui.Parent = local_player:WaitForChild("PlayerGui")
+
+local main = Instance.new("Frame")
+main.Size = UDim2.fromOffset(640, 400)
+main.Position = UDim2.fromScale(0.5, 0.5)
+main.AnchorPoint = Vector2.new(0.5, 0.5)
+main.BackgroundColor3 = elysium.theme.background
+main.Visible = false
+main.Parent = gui
+
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 8)
+
+local sidebar = Instance.new("Frame")
+sidebar.Size = UDim2.fromOffset(160, 400)
+sidebar.BackgroundColor3 = Color3.fromRGB(16, 16, 16)
+sidebar.Parent = main
+Instance.new("UICorner", sidebar).CornerRadius = UDim.new(0, 8)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 44)
+title.BackgroundTransparency = 1
+title.Text = "ELYSIUM"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = elysium.theme.text
+title.Parent = sidebar
+
+local tab_holder = Instance.new("Frame")
+tab_holder.Position = UDim2.fromOffset(0, 44)
+tab_holder.Size = UDim2.new(1, 0, 1, -44)
+tab_holder.BackgroundTransparency = 1
+tab_holder.Parent = sidebar
+
+local tab_layout = Instance.new("UIListLayout", tab_holder)
+tab_layout.Padding = UDim.new(0, 6)
+
+local content = Instance.new("Frame")
+content.Position = UDim2.fromOffset(170, 10)
+content.Size = UDim2.new(1, -180, 1, -20)
+content.BackgroundColor3 = elysium.theme.panel
+content.Parent = main
+Instance.new("UICorner", content).CornerRadius = UDim.new(0, 8)
+
+elysium.ui.current = nil
+
+-- tab system
+function elysium.ui.tab(name)
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(1, -12, 0, 32)
+	button.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+	button.Text = name
+	button.Font = Enum.Font.Gotham
+	button.TextSize = 14
+	button.TextColor3 = elysium.theme.text
+	button.Parent = tab_holder
+	Instance.new("UICorner", button).CornerRadius = UDim.new(0, 5)
+
+	local page = Instance.new("Frame")
+	page.Size = UDim2.fromScale(1, 1)
+	page.BackgroundTransparency = 1
+	page.Visible = false
+	page.Parent = content
+
+	local layout = Instance.new("UIListLayout", page)
+	layout.Padding = UDim.new(0, 6)
+
+	button.MouseButton1Click:Connect(function()
+		if elysium.ui.current then
+			elysium.ui.current.Visible = false
+		end
+		page.Visible = true
+		elysium.ui.current = page
+	end)
+
+	if not elysium.ui.current then
+		page.Visible = true
+		elysium.ui.current = page
+	end
+
+	return page
+end
+
+-- controls
+function elysium.ui.toggle(parent, name, flag)
+	elysium.flags[flag] = false
+
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(1, -12, 0, 28)
+	b.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+	b.Text = name
+	b.Font = Enum.Font.Gotham
+	b.TextSize = 14
+	b.TextColor3 = elysium.theme.text
+	b.Parent = parent
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 4)
+
+	b.MouseButton1Click:Connect(function()
+		elysium.flags[flag] = not elysium.flags[flag]
+		b.BackgroundColor3 = elysium.flags[flag]
+			and Color3.fromRGB(40, 40, 40)
+			or Color3.fromRGB(28, 28, 28)
+	end)
+end
+
+function elysium.ui.bind(parent, name, bind_key)
+	elysium.binds[name] = bind_key
+
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(1, -12, 0, 28)
+	b.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	b.Text = name .. ": " .. bind_key.Name
+	b.Font = Enum.Font.Gotham
+	b.TextSize = 14
+	b.TextColor3 = elysium.theme.text
+	b.Parent = parent
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 4)
+
+	b.MouseButton1Click:Connect(function()
+		b.Text = name .. ": ..."
+		local conn
+		conn = services.input.InputBegan:Connect(function(i)
+			if i.KeyCode ~= Enum.KeyCode.Unknown then
+				elysium.binds[name] = i.KeyCode
+				b.Text = name .. ": " .. i.KeyCode.Name
+				conn:Disconnect()
+			end
+		end)
+	end)
+end
+
+-- utilities
+elysium.math = {}
+
+function elysium.math.world_to_screen(pos)
+	local v, on_screen = services.camera:WorldToViewportPoint(pos)
+	return Vector2.new(v.X, v.Y), on_screen
+end
+
+function elysium.math.wallcheck(origin, target)
+	local ray_params = RaycastParams.new()
+	ray_params.FilterType = Enum.RaycastFilterType.Blacklist
+	ray_params.FilterDescendantsInstances = {local_player.Character}
+	local result = workspace:Raycast(origin, target - origin, ray_params)
+	return not result
+end
+
+-- player list
+function elysium.ui.player_list(parent)
+	for _, p in ipairs(services.players:GetPlayers()) do
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.new(1, -12, 0, 24)
+		label.BackgroundTransparency = 1
+		label.Text = p.Name
+		label.Font = Enum.Font.Gotham
+		label.TextSize = 13
+		label.TextColor3 = elysium.theme.text
+		label.Parent = parent
+	end
+end
+
+-- search
+function elysium.ui.search(parent, callback)
+	local box = Instance.new("TextBox")
+	box.Size = UDim2.new(1, -12, 0, 28)
+	box.PlaceholderText = "search..."
+	box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	box.Font = Enum.Font.Gotham
+	box.TextSize = 14
+	box.TextColor3 = elysium.theme.text
+	box.Parent = parent
+	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 4)
+
+	box:GetPropertyChangedSignal("Text"):Connect(function()
+		callback(box.Text)
+	end)
+end
+
+-- input
+services.input.InputBegan:Connect(function(i)
+	if i.KeyCode == Enum.KeyCode.Insert then
+		main.Visible = not main.Visible
+	end
+	if elysium.binds["kill_menu"] and i.KeyCode == elysium.binds["kill_menu"] then
+		gui:Destroy()
+	end
+end)
+
+return elysium
