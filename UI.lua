@@ -730,6 +730,7 @@ function Elysium:AddTab(name, icon)
 	
 	-- Auto select first tab
 	if #self.Tabs == 1 then
+		task.wait()
 		self:SelectTab(tab)
 	end
 	
