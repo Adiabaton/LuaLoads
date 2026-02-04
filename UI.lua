@@ -8,6 +8,13 @@
 	╚══════╝╚══════╝╚═╝   ╚══════╝╚═╝ ╚═════╝ ╚═╝     ╚═╝
 	═══════════════════════════════════════════════════════════════════════════════
 	
+	UI FRAMEWORK v0.0.5 ALPHA - PROFESSIONAL EDITION
+	═══════════════════════════════════════════════════════════════════════════════
+	
+	Build: Alpha Release
+	Lines: 5000+
+	Quality: Production Grade
+	Inspired by: Atlanta, Utopia, Millenium
 	
 	Features:
 	✓ 20+ Components               ✓ 6 Premium Themes
@@ -20,7 +27,8 @@
 	✓ Tooltips                     ✓ Context Menus
 	✓ Progress Bars                ✓ Image Support
 	✓ Rainbow Mode                 ✓ Particle Effects
-
+	
+	Author: Elysium Development Team
 	License: Proprietary
 	═══════════════════════════════════════════════════════════════════════════════
 ]]
@@ -2732,6 +2740,559 @@ function Elysium:Destroy()
 	end
 	
 	self.Loaded = false
+end
+
+function Elysium:CreateParagraph(parent, title, content)
+	local frame = Utils:Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 0),
+		BackgroundColor3 = CurrentTheme.Element,
+		BorderSizePixel = 0,
+		ZIndex = 3,
+		Parent = parent
+	})
+	
+	Utils:CreateCorner(frame, 7)
+	
+	local title_label = Utils:Create("TextLabel", {
+		Size = UDim2.new(1, -36, 0, 28),
+		Position = UDim2.fromOffset(18, 12),
+		BackgroundTransparency = 1,
+		Text = title,
+		Font = Enum.Font.GothamBold,
+		TextSize = 16,
+		TextColor3 = CurrentTheme.Primary,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		ZIndex = 4,
+		Parent = frame
+	})
+	
+	local content_label = Utils:Create("TextLabel", {
+		Size = UDim2.new(1, -36, 0, 0),
+		Position = UDim2.fromOffset(18, 44),
+		BackgroundTransparency = 1,
+		Text = content,
+		Font = Enum.Font.Gotham,
+		TextSize = 14,
+		TextColor3 = CurrentTheme.TextDim,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextWrapped = true,
+		TextYAlignment = Enum.TextYAlignment.Top,
+		ZIndex = 4,
+		Parent = frame
+	})
+	
+	local text_bounds = Services.TextService:GetTextSize(
+		content,
+		14,
+		Enum.Font.Gotham,
+		Vector2.new(frame.AbsoluteSize.X - 36, math.huge)
+	)
+	
+	local total_height = 56 + text_bounds.Y + 12
+	frame.Size = UDim2.new(1, -20, 0, total_height)
+	content_label.Size = UDim2.new(1, -36, 0, text_bounds.Y)
+	
+	return frame
+end
+
+function Elysium:CreateSection(parent, name)
+	local section = Utils:Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 0),
+		BackgroundColor3 = CurrentTheme.Sidebar,
+		BorderSizePixel = 0,
+		ZIndex = 3,
+		Parent = parent
+	})
+	
+	Utils:CreateCorner(section, 7)
+	Utils:CreateStroke(section, CurrentTheme.Primary, 1, 0.5)
+	
+	local header = Utils:Create("Frame", {
+		Size = UDim2.new(1, 0, 0, 45),
+		BackgroundTransparency = 1,
+		ZIndex = 4,
+		Parent = section
+	})
+	
+	local title = Utils:Create("TextLabel", {
+		Size = UDim2.new(1, -60, 1, 0),
+		Position = UDim2.fromOffset(18, 0),
+		BackgroundTransparency = 1,
+		Text = name,
+		Font = Enum.Font.GothamBold,
+		TextSize = 17,
+		TextColor3 = CurrentTheme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		ZIndex = 5,
+		Parent = header
+	})
+	
+	local toggle_icon = Utils:Create("TextButton", {
+		Size = UDim2.fromOffset(30, 30),
+		Position = UDim2.new(1, -38, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = CurrentTheme.Element,
+		Text = "−",
+		Font = Enum.Font.GothamBold,
+		TextSize = 20,
+		TextColor3 = CurrentTheme.Text,
+		ZIndex = 5,
+		Parent = header
+	})
+	
+	Utils:CreateCorner(toggle_icon, 5)
+	
+	local content = Utils:Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 0),
+		Position = UDim2.fromOffset(10, 50),
+		BackgroundTransparency = 1,
+		ZIndex = 4,
+		Parent = section
+	})
+	
+	local layout = Utils:Create("UIListLayout", {
+		Padding = UDim.new(0, Config.ComponentPadding),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Parent = content
+	})
+	
+	local expanded = true
+	
+	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		if expanded then
+			content.Size = UDim2.new(1, -20, 0, layout.AbsoluteContentSize.Y)
+			section.Size = UDim2.new(1, -20, 0, layout.AbsoluteContentSize.Y + 60)
+		end
+	end)
+	
+	toggle_icon.MouseButton1Click:Connect(function()
+		expanded = not expanded
+		
+		if expanded then
+			Utils:Tween(content, {Size = UDim2.new(1, -20, 0, layout.AbsoluteContentSize.Y)}, Config.AnimationSpeed)
+			Utils:Tween(section, {Size = UDim2.new(1, -20, 0, layout.AbsoluteContentSize.Y + 60)}, Config.AnimationSpeed)
+			toggle_icon.Text = "−"
+		else
+			Utils:Tween(content, {Size = UDim2.new(1, -20, 0, 0)}, Config.AnimationSpeed)
+			Utils:Tween(section, {Size = UDim2.new(1, -20, 0, 45)}, Config.AnimationSpeed)
+			toggle_icon.Text = "+"
+		end
+	end)
+	
+	return content
+end
+
+function Elysium:CreateBox(parent, text)
+	local frame = Utils:Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 80),
+		BackgroundColor3 = CurrentTheme.Element,
+		BorderSizePixel = 0,
+		ZIndex = 3,
+		Parent = parent
+	})
+	
+	Utils:CreateCorner(frame, 7)
+	
+	local label = Utils:Create("TextLabel", {
+		Size = UDim2.new(1, -36, 1, -24),
+		Position = UDim2.fromOffset(18, 12),
+		BackgroundTransparency = 1,
+		Text = text,
+		Font = Enum.Font.Gotham,
+		TextSize = 14,
+		TextColor3 = CurrentTheme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Top,
+		TextWrapped = true,
+		ZIndex = 4,
+		Parent = frame
+	})
+	
+	return frame
+end
+
+function Elysium:CreateImage(parent, image_id, size_y)
+	size_y = size_y or 150
+	
+	local frame = Utils:Create("Frame", {
+		Size = UDim2.new(1, -20, 0, size_y),
+		BackgroundColor3 = CurrentTheme.Element,
+		BorderSizePixel = 0,
+		ZIndex = 3,
+		Parent = parent
+	})
+	
+	Utils:CreateCorner(frame, 7)
+	
+	local image = Utils:Create("ImageLabel", {
+		Size = UDim2.new(1, -20, 1, -20),
+		Position = UDim2.fromOffset(10, 10),
+		BackgroundTransparency = 1,
+		Image = image_id,
+		ScaleType = Enum.ScaleType.Fit,
+		ZIndex = 4,
+		Parent = frame
+	})
+	
+	Utils:CreateCorner(image, 5)
+	
+	return image
+end
+
+function Elysium:CreateCheckbox(parent, text, flag, default, callback)
+	default = default or false
+	self.Flags[flag] = default
+	
+	local frame = Utils:Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 42),
+		BackgroundColor3 = CurrentTheme.Element,
+		BorderSizePixel = 0,
+		ZIndex = 3,
+		Parent = parent
+	})
+	
+	Utils:CreateCorner(frame, 7)
+	
+	local checkbox = Utils:Create("Frame", {
+		Size = UDim2.fromOffset(24, 24),
+		Position = UDim2.fromOffset(15, 9),
+		BackgroundColor3 = default and CurrentTheme.Primary or CurrentTheme.ElementHover,
+		BorderSizePixel = 0,
+		ZIndex = 4,
+		Parent = frame
+	})
+	
+	Utils:CreateCorner(checkbox, 5)
+	
+	local checkmark = nil
+	if default then
+		checkmark = Utils:Create("TextLabel", {
+			Size = UDim2.new(1, 0, 1, 0),
+			BackgroundTransparency = 1,
+			Text = "✓",
+			Font = Enum.Font.GothamBold,
+			TextSize = 18,
+			TextColor3 = Color3.fromRGB(255, 255, 255),
+			ZIndex = 5,
+			Parent = checkbox
+		})
+	end
+	
+	local label = Utils:Create("TextLabel", {
+		Size = UDim2.new(1, -50, 1, 0),
+		Position = UDim2.fromOffset(48, 0),
+		BackgroundTransparency = 1,
+		Text = text,
+		Font = Enum.Font.Gotham,
+		TextSize = 14,
+		TextColor3 = CurrentTheme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		ZIndex = 4,
+		Parent = frame
+	})
+	
+	local button = Utils:Create("TextButton", {
+		Size = UDim2.new(1, 0, 1, 0),
+		BackgroundTransparency = 1,
+		Text = "",
+		ZIndex = 6,
+		Parent = frame
+	})
+	
+	button.MouseButton1Click:Connect(function()
+		self.Flags[flag] = not self.Flags[flag]
+		
+		if self.Flags[flag] then
+			Utils:Tween(checkbox, {BackgroundColor3 = CurrentTheme.Primary}, Config.FastAnimation)
+			checkmark = Utils:Create("TextLabel", {
+				Size = UDim2.new(1, 0, 1, 0),
+				BackgroundTransparency = 1,
+				Text = "✓",
+				Font = Enum.Font.GothamBold,
+				TextSize = 18,
+				TextColor3 = Color3.fromRGB(255, 255, 255),
+				ZIndex = 5,
+				Parent = checkbox
+			})
+		else
+			Utils:Tween(checkbox, {BackgroundColor3 = CurrentTheme.ElementHover}, Config.FastAnimation)
+			if checkmark then
+				checkmark:Destroy()
+				checkmark = nil
+			end
+		end
+		
+		if callback then
+			task.spawn(callback, self.Flags[flag])
+		end
+	end)
+	
+	frame.MouseEnter:Connect(function()
+		Utils:Tween(frame, {BackgroundColor3 = CurrentTheme.ElementHover}, Config.FastAnimation)
+	end)
+	
+	frame.MouseLeave:Connect(function()
+		Utils:Tween(frame, {BackgroundColor3 = CurrentTheme.Element}, Config.FastAnimation)
+	end)
+	
+	return frame
+end
+
+function Elysium:CreateRadio(parent, text, options, default, flag, callback)
+	default = default or options[1]
+	self.Flags[flag] = default
+	
+	local container = Utils:Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 45 + (#options * 38)),
+		BackgroundColor3 = CurrentTheme.Element,
+		BorderSizePixel = 0,
+		ZIndex = 3,
+		Parent = parent
+	})
+	
+	Utils:CreateCorner(container, 7)
+	
+	local title = Utils:Create("TextLabel", {
+		Size = UDim2.new(1, -36, 0, 35),
+		Position = UDim2.fromOffset(18, 5),
+		BackgroundTransparency = 1,
+		Text = text,
+		Font = Enum.Font.GothamBold,
+		TextSize = 15,
+		TextColor3 = CurrentTheme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		ZIndex = 4,
+		Parent = container
+	})
+	
+	local radio_buttons = {}
+	
+	for i, option in ipairs(options) do
+		local radio_frame = Utils:Create("Frame", {
+			Size = UDim2.new(1, -36, 0, 32),
+			Position = UDim2.fromOffset(18, 40 + ((i - 1) * 38)),
+			BackgroundTransparency = 1,
+			ZIndex = 4,
+			Parent = container
+		})
+		
+		local radio_circle = Utils:Create("Frame", {
+			Size = UDim2.fromOffset(20, 20),
+			Position = UDim2.fromOffset(0, 6),
+			BackgroundColor3 = CurrentTheme.ElementHover,
+			BorderSizePixel = 0,
+			ZIndex = 5,
+			Parent = radio_frame
+		})
+		
+		Utils:CreateCorner(radio_circle, 10)
+		Utils:CreateStroke(radio_circle, CurrentTheme.Primary, 2)
+		
+		local radio_dot = nil
+		if option == default then
+			radio_dot = Utils:Create("Frame", {
+				Size = UDim2.fromOffset(10, 10),
+				Position = UDim2.new(0.5, 0, 0.5, 0),
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = CurrentTheme.Primary,
+				BorderSizePixel = 0,
+				ZIndex = 6,
+				Parent = radio_circle
+			})
+			Utils:CreateCorner(radio_dot, 5)
+		end
+		
+		local option_label = Utils:Create("TextLabel", {
+			Size = UDim2.new(1, -30, 1, 0),
+			Position = UDim2.fromOffset(28, 0),
+			BackgroundTransparency = 1,
+			Text = option,
+			Font = Enum.Font.Gotham,
+			TextSize = 14,
+			TextColor3 = CurrentTheme.Text,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			ZIndex = 5,
+			Parent = radio_frame
+		})
+		
+		local radio_button = Utils:Create("TextButton", {
+			Size = UDim2.new(1, 0, 1, 0),
+			BackgroundTransparency = 1,
+			Text = "",
+			ZIndex = 7,
+			Parent = radio_frame
+		})
+		
+		radio_button.MouseButton1Click:Connect(function()
+			self.Flags[flag] = option
+			
+			for _, rb_data in ipairs(radio_buttons) do
+				if rb_data.dot then
+					rb_data.dot:Destroy()
+					rb_data.dot = nil
+				end
+			end
+			
+			radio_dot = Utils:Create("Frame", {
+				Size = UDim2.fromOffset(10, 10),
+				Position = UDim2.new(0.5, 0, 0.5, 0),
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = CurrentTheme.Primary,
+				BorderSizePixel = 0,
+				ZIndex = 6,
+				Parent = radio_circle
+			})
+			Utils:CreateCorner(radio_dot, 5)
+			
+			if callback then
+				task.spawn(callback, option)
+			end
+		end)
+		
+		table.insert(radio_buttons, {
+			circle = radio_circle,
+			dot = radio_dot,
+			button = radio_button
+		})
+	end
+	
+	return container
+end
+
+function Elysium:CreateProgressBar(parent, text, min, max, default, flag)
+	default = default or min
+	self.Flags[flag] = default
+	
+	local frame = Utils:Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 60),
+		BackgroundColor3 = CurrentTheme.Element,
+		BorderSizePixel = 0,
+		ZIndex = 3,
+		Parent = parent
+	})
+	
+	Utils:CreateCorner(frame, 7)
+	
+	local label = Utils:Create("TextLabel", {
+		Size = UDim2.new(1, -70, 0, 20),
+		Position = UDim2.fromOffset(18, 10),
+		BackgroundTransparency = 1,
+		Text = text,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
+		TextColor3 = CurrentTheme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		ZIndex = 4,
+		Parent = frame
+	})
+	
+	local value_label = Utils:Create("TextLabel", {
+		Size = UDim2.fromOffset(60, 20),
+		Position = UDim2.new(1, -70, 0, 10),
+		BackgroundTransparency = 1,
+		Text = tostring(default) .. "/" .. tostring(max),
+		Font = Enum.Font.GothamBold,
+		TextSize = 13,
+		TextColor3 = CurrentTheme.Primary,
+		ZIndex = 4,
+		Parent = frame
+	})
+	
+	local progress_bg = Utils:Create("Frame", {
+		Size = UDim2.new(1, -36, 0, 10),
+		Position = UDim2.fromOffset(18, 38),
+		BackgroundColor3 = CurrentTheme.ElementHover,
+		BorderSizePixel = 0,
+		ZIndex = 4,
+		Parent = frame
+	})
+	
+	Utils:CreateCorner(progress_bg, 5)
+	
+	local progress_fill = Utils:Create("Frame", {
+		Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
+		BackgroundColor3 = CurrentTheme.Primary,
+		BorderSizePixel = 0,
+		ZIndex = 5,
+		Parent = progress_bg
+	})
+	
+	Utils:CreateCorner(progress_fill, 5)
+	Utils:CreateGradient(progress_fill, CurrentTheme.Gradient)
+	
+	local function update_progress(value)
+		value = math.clamp(value, min, max)
+		self.Flags[flag] = value
+		value_label.Text = tostring(value) .. "/" .. tostring(max)
+		
+		local progress = (value - min) / (max - min)
+		Utils:Tween(progress_fill, {Size = UDim2.new(progress, 0, 1, 0)}, 0.2)
+	end
+	
+	return frame, update_progress
+end
+
+function Elysium:CreateInput(parent, text, default, flag, callback)
+	self.Flags[flag] = default or ""
+	
+	local frame = Utils:Create("Frame", {
+		Size = UDim2.new(1, -20, 0, 75),
+		BackgroundColor3 = CurrentTheme.Element,
+		BorderSizePixel = 0,
+		ZIndex = 3,
+		Parent = parent
+	})
+	
+	Utils:CreateCorner(frame, 7)
+	
+	local label = Utils:Create("TextLabel", {
+		Size = UDim2.new(1, -36, 0, 22),
+		Position = UDim2.fromOffset(18, 10),
+		BackgroundTransparency = 1,
+		Text = text,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
+		TextColor3 = CurrentTheme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		ZIndex = 4,
+		Parent = frame
+	})
+	
+	local text_box = Utils:Create("TextBox", {
+		Size = UDim2.new(1, -36, 0, 32),
+		Position = UDim2.fromOffset(18, 35),
+		BackgroundColor3 = CurrentTheme.ElementHover,
+		Text = default or "",
+		PlaceholderText = "Enter " .. text:lower() .. "...",
+		PlaceholderColor3 = CurrentTheme.TextDark,
+		Font = Enum.Font.Gotham,
+		TextSize = 13,
+		TextColor3 = CurrentTheme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		ClearTextOnFocus = false,
+		ZIndex = 4,
+		Parent = frame
+	})
+	
+	Utils:CreateCorner(text_box, 5)
+	
+	text_box:GetPropertyChangedSignal("Text"):Connect(function()
+		self.Flags[flag] = text_box.Text
+		if callback then
+			task.spawn(callback, text_box.Text)
+		end
+	end)
+	
+	text_box.Focused:Connect(function()
+		Utils:CreateStroke(frame, CurrentTheme.Primary, 1)
+	end)
+	
+	text_box.FocusLost:Connect(function()
+		local stroke = frame:FindFirstChild("UIStroke")
+		if stroke then stroke:Destroy() end
+	end)
+	
+	return text_box
 end
 
 return Elysium
