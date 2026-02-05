@@ -16,24 +16,35 @@ local defaults = {
 	enabled = true,
 	team_check = false,
 	max_distance = 3000,
+	update_rate = 0,
+	max_players_drawn = 0,
+	box_fill_panels = false,
 
 	box_2d = true,
 	corner_box = false,
 	box_3d = false,
+	wire_box_3d = false,
 	skeleton = false,
 	chams = false,
 	glow = false,
 	highlight = true,
+	fill_box = false,
+	box_outline = true,
+	gradient_box = false,
+	direction = false,
 
 	name = true,
 	health = true,
 	distance = true,
 	weapon = false,
+	velocity = false,
 
+	snaplines = false,
+	snapline_from = "bottom",
 	tracers = false,
 	tracer_from = "bottom",
-	out_of_view = false,
-	arrows = false,
+	out_of_view = true,
+	arrows = true,
 
 	rainbow = false,
 	use_billboard = false,
@@ -41,13 +52,18 @@ local defaults = {
 
 	box_color = Color3.fromRGB(200, 200, 200),
 	corner_color = Color3.fromRGB(200, 200, 200),
+	fill_color = Color3.fromRGB(200, 200, 200),
 	text_color = Color3.fromRGB(240, 240, 240),
 	tracer_color = Color3.fromRGB(200, 200, 200),
 	arrow_color = Color3.fromRGB(200, 200, 200),
+	snapline_color = Color3.fromRGB(200, 200, 200),
 	chams_color = Color3.fromRGB(200, 200, 200),
 	highlight_fill = Color3.fromRGB(200, 200, 200),
 	highlight_outline = Color3.fromRGB(90, 90, 90),
-	health_color = Color3.fromRGB(90, 220, 110)
+	health_color = Color3.fromRGB(90, 220, 110),
+	velocity_color = Color3.fromRGB(140, 170, 230),
+	team_color = false,
+	weapon_colors = {}
 }
 
 local function clamp(value, min_value, max_value)
@@ -92,6 +108,25 @@ local function get_tool_name(character)
 	end
 	local tool = character:FindFirstChildOfClass("Tool")
 	return tool and tool.Name or ""
+end
+
+local function get_weapon_color(config, tool_name)
+	if config.weapon_colors and config.weapon_colors[tool_name] then
+		return config.weapon_colors[tool_name]
+	end
+	if tool_name == "" then
+		return config.text_color
+	end
+	local hash = 0
+	for i = 1, #tool_name do
+		hash = (hash + tool_name:byte(i) * i) % 255
+	end
+	return Color3.fromHSV((hash / 255), 0.6, 0.9)
+end
+
+local function get_outline_thickness(distance)
+	local base = 2 - (distance / 2000)
+	return clamp(base, 1, 2)
 end
 
 local function world_to_screen(position)
@@ -224,6 +259,77 @@ function ElyESP:create_highlight(player)
 	self.objects[player].highlight = highlight
 end
 
+function ElyESP:create_chams(player)
+	local character = player.Character
+	if not character then
+		return
+	end
+
+	local cham_folder = Instance.new("Folder")
+	cham_folder.Name = "ElyESP_Chams"
+	cham_folder.Parent = character
+
+	for _, part in ipairs(character:GetChildren()) do
+		if part:IsA("BasePart") then
+			local adorn = Instance.new("BoxHandleAdornment")
+			adorn.Name = "ElyESP_Cham"
+			adorn.Adornee = part
+			adorn.AlwaysOnTop = true
+			adorn.ZIndex = 0
+			adorn.Size = part.Size + Vector3.new(0.02, 0.02, 0.02)
+			adorn.Transparency = 0.5
+			adorn.Color3 = self.config.chams_color
+			adorn.Parent = cham_folder
+		end
+	end
+
+	self.objects[player] = self.objects[player] or {}
+	self.objects[player].chams = cham_folder
+end
+
+function ElyESP:create_glow(player)
+	local character = player.Character
+	if not character then
+		return
+	end
+
+	local glow = Instance.new("Highlight")
+	glow.Name = "ElyESP_Glow"
+	glow.Adornee = character
+	glow.FillTransparency = 1
+	glow.OutlineTransparency = 0
+	glow.OutlineColor = self.config.chams_color
+	glow.Parent = character
+
+	self.objects[player] = self.objects[player] or {}
+	self.objects[player].glow = glow
+end
+
+function ElyESP:create_box_panels(player)
+	local character = player.Character
+	if not character then
+		return
+	end
+
+	local root = get_root(character)
+	if not root then
+		return
+	end
+
+	local box = Instance.new("BoxHandleAdornment")
+	box.Name = "ElyESP_BoxPanel"
+	box.Adornee = root
+	box.AlwaysOnTop = false
+	box.ZIndex = 0
+	box.Size = Vector3.new(4, 6, 2)
+	box.Transparency = 0.75
+	box.Color3 = self.config.fill_color
+	box.Parent = root
+
+	self.objects[player] = self.objects[player] or {}
+	self.objects[player].box_panel = box
+end
+
 function ElyESP:create_billboard(player)
 	local character = player.Character
 	if not character then
@@ -292,15 +398,26 @@ end
 function ElyESP:create_drawings(player)
 	local drawings = {
 		box = create_drawing("Square"),
+		box_fill = create_drawing("Square"),
 		corner = {},
+		snapline = create_drawing("Line"),
 		tracer = create_drawing("Line"),
 		arrow = create_drawing("Triangle"),
+		arrow_label = create_drawing("Text"),
 		name = create_drawing("Text"),
 		health = create_drawing("Line"),
+		health_bg = create_drawing("Line"),
 		distance = create_drawing("Text"),
 		weapon = create_drawing("Text"),
-		skeleton = {}
+		velocity = create_drawing("Text"),
+		direction = create_drawing("Line"),
+		skeleton = {},
+		wire_box = {}
 	}
+
+	for i = 1, 12 do
+		drawings.wire_box[i] = create_drawing("Line")
+	end
 
 	for i = 1, 8 do
 		drawings.corner[i] = create_drawing("Line")
@@ -312,6 +429,41 @@ function ElyESP:create_drawings(player)
 
 	self.objects[player] = self.objects[player] or {}
 	self.objects[player].drawings = drawings
+end
+
+local function get_joint_positions(character)
+	local joints = {}
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not humanoid then
+		return joints
+	end
+
+	local parts = {
+		Head = "Head",
+		UpperTorso = "UpperTorso",
+		LowerTorso = "LowerTorso",
+		LeftUpperArm = "LeftUpperArm",
+		LeftLowerArm = "LeftLowerArm",
+		LeftHand = "LeftHand",
+		RightUpperArm = "RightUpperArm",
+		RightLowerArm = "RightLowerArm",
+		RightHand = "RightHand",
+		LeftUpperLeg = "LeftUpperLeg",
+		LeftLowerLeg = "LeftLowerLeg",
+		LeftFoot = "LeftFoot",
+		RightUpperLeg = "RightUpperLeg",
+		RightLowerLeg = "RightLowerLeg",
+		RightFoot = "RightFoot"
+	}
+
+	for key, part_name in pairs(parts) do
+		local part = character:FindFirstChild(part_name)
+		if part then
+			joints[key] = part.Position
+		end
+	end
+
+	return joints
 end
 
 function ElyESP:update_drawings(player)
@@ -346,17 +498,35 @@ function ElyESP:update_drawings(player)
 	local height = max_pos.Y - min_pos.Y
 	local mid_x = (min_pos.X + max_pos.X) / 2
 	local color = self.config.rainbow and get_rainbow_color() or self.config.box_color
+	if self.config.team_color and player.Team then
+		color = player.Team.TeamColor.Color
+	end
 
 	if self.config.box_2d and obj.drawings.box then
+		local thickness = get_outline_thickness(get_distance(character))
 		obj.drawings.box.Visible = true
 		obj.drawings.box.Position = min_pos
 		obj.drawings.box.Size = Vector2.new(width, height)
 		obj.drawings.box.Color = color
-		obj.drawings.box.Thickness = 1
+		obj.drawings.box.Thickness = self.config.box_outline and thickness or 1
 		obj.drawings.box.Filled = false
 	else
 		if obj.drawings.box then
 			obj.drawings.box.Visible = false
+		end
+	end
+
+	if self.config.fill_box and obj.drawings.box_fill then
+		obj.drawings.box_fill.Visible = true
+		obj.drawings.box_fill.Position = min_pos
+		obj.drawings.box_fill.Size = Vector2.new(width, height)
+		obj.drawings.box_fill.Color = self.config.rainbow and get_rainbow_color() or self.config.fill_color
+		obj.drawings.box_fill.Thickness = 1
+		obj.drawings.box_fill.Filled = true
+		obj.drawings.box_fill.Transparency = self.config.gradient_box and 0.35 or 0.2
+	else
+		if obj.drawings.box_fill then
+			obj.drawings.box_fill.Visible = false
 		end
 	end
 
@@ -385,6 +555,25 @@ function ElyESP:update_drawings(player)
 	else
 		for _, line in ipairs(obj.drawings.corner) do
 			line.Visible = false
+		end
+	end
+
+	if self.config.snaplines and obj.drawings.snapline then
+		local viewport = services.workspace.CurrentCamera.ViewportSize
+		local from_y = 0
+		if self.config.snapline_from == "center" then
+			from_y = viewport.Y / 2
+		elseif self.config.snapline_from == "bottom" then
+			from_y = viewport.Y
+		end
+		obj.drawings.snapline.Visible = true
+		obj.drawings.snapline.From = Vector2.new(viewport.X / 2, from_y)
+		obj.drawings.snapline.To = Vector2.new(mid_x, max_pos.Y)
+		obj.drawings.snapline.Color = self.config.rainbow and get_rainbow_color() or self.config.snapline_color
+		obj.drawings.snapline.Thickness = 1
+	else
+		if obj.drawings.snapline then
+			obj.drawings.snapline.Visible = false
 		end
 	end
 
@@ -419,6 +608,12 @@ function ElyESP:update_drawings(player)
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 		if humanoid then
 			local health_percent = clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
+			obj.drawings.health_bg.Visible = true
+			obj.drawings.health_bg.From = Vector2.new(min_pos.X - 4, max_pos.Y)
+			obj.drawings.health_bg.To = Vector2.new(min_pos.X - 4, min_pos.Y)
+			obj.drawings.health_bg.Color = Color3.fromRGB(40, 40, 40)
+			obj.drawings.health_bg.Thickness = 3
+
 			obj.drawings.health.Visible = true
 			obj.drawings.health.From = Vector2.new(min_pos.X - 4, max_pos.Y)
 			obj.drawings.health.To = Vector2.new(min_pos.X - 4, max_pos.Y - (height * health_percent))
@@ -428,6 +623,9 @@ function ElyESP:update_drawings(player)
 	else
 		if obj.drawings.health then
 			obj.drawings.health.Visible = false
+		end
+		if obj.drawings.health_bg then
+			obj.drawings.health_bg.Visible = false
 		end
 	end
 
@@ -448,15 +646,174 @@ function ElyESP:update_drawings(player)
 
 	if self.config.weapon and obj.drawings.weapon then
 		obj.drawings.weapon.Visible = true
-		obj.drawings.weapon.Text = get_tool_name(character)
+		local tool_name = get_tool_name(character)
+		obj.drawings.weapon.Text = tool_name
 		obj.drawings.weapon.Size = self.config.text_size - 1
-		obj.drawings.weapon.Color = self.config.text_color
+		local weapon_color = get_weapon_color(self.config, tool_name)
+		obj.drawings.weapon.Color = weapon_color
 		obj.drawings.weapon.Center = true
 		obj.drawings.weapon.Outline = true
 		obj.drawings.weapon.Position = Vector2.new(mid_x, max_pos.Y + 14)
 	else
 		if obj.drawings.weapon then
 			obj.drawings.weapon.Visible = false
+		end
+	end
+
+	if self.config.velocity and obj.drawings.velocity then
+		local root_vel = root.AssemblyLinearVelocity
+		local speed = math.floor(root_vel.Magnitude)
+		obj.drawings.velocity.Visible = true
+		obj.drawings.velocity.Text = string.format("%d studs/s", speed)
+		obj.drawings.velocity.Size = self.config.text_size - 1
+		obj.drawings.velocity.Color = self.config.velocity_color
+		obj.drawings.velocity.Center = true
+		obj.drawings.velocity.Outline = true
+		obj.drawings.velocity.Position = Vector2.new(mid_x, max_pos.Y + 28)
+	else
+		if obj.drawings.velocity then
+			obj.drawings.velocity.Visible = false
+		end
+	end
+
+	if self.config.direction and obj.drawings.direction then
+		local forward = root.CFrame.LookVector
+		local start_pos = root.Position
+		local end_pos = start_pos + forward * 3
+		local start_screen, start_visible = world_to_screen(start_pos)
+		local end_screen, end_visible = world_to_screen(end_pos)
+		obj.drawings.direction.Visible = start_visible and end_visible
+		obj.drawings.direction.From = start_screen
+		obj.drawings.direction.To = end_screen
+		obj.drawings.direction.Color = self.config.velocity_color
+		obj.drawings.direction.Thickness = 2
+	else
+		if obj.drawings.direction then
+			obj.drawings.direction.Visible = false
+		end
+	end
+
+	if self.config.skeleton and obj.drawings.skeleton then
+		local joints = get_joint_positions(character)
+		local segments = {
+			{"Head", "UpperTorso"},
+			{"UpperTorso", "LowerTorso"},
+			{"UpperTorso", "LeftUpperArm"},
+			{"LeftUpperArm", "LeftLowerArm"},
+			{"LeftLowerArm", "LeftHand"},
+			{"UpperTorso", "RightUpperArm"},
+			{"RightUpperArm", "RightLowerArm"},
+			{"RightLowerArm", "RightHand"},
+			{"LowerTorso", "LeftUpperLeg"},
+			{"LeftUpperLeg", "LeftLowerLeg"},
+			{"LeftLowerLeg", "LeftFoot"},
+			{"LowerTorso", "RightUpperLeg"},
+			{"RightUpperLeg", "RightLowerLeg"},
+			{"RightLowerLeg", "RightFoot"}
+		}
+
+		local skeleton_color = self.config.rainbow and get_rainbow_color() or self.config.box_color
+		if self.config.team_color and player.Team then
+			skeleton_color = player.Team.TeamColor.Color
+		end
+		for i, pair in ipairs(segments) do
+			local line = obj.drawings.skeleton[i]
+			local start_pos = joints[pair[1]]
+			local end_pos = joints[pair[2]]
+			if line and start_pos and end_pos then
+				local start_screen, start_visible = world_to_screen(start_pos)
+				local end_screen, end_visible = world_to_screen(end_pos)
+				line.Visible = start_visible and end_visible
+				line.From = start_screen
+				line.To = end_screen
+				line.Color = skeleton_color
+				line.Thickness = 1
+			elseif line then
+				line.Visible = false
+			end
+		end
+	else
+		if obj.drawings.skeleton then
+			for _, line in ipairs(obj.drawings.skeleton) do
+				line.Visible = false
+			end
+		end
+	end
+
+	if self.config.wire_box_3d and obj.drawings.wire_box then
+		local corners = get_character_bounds(character)
+		if corners then
+			local edges = {
+				{1, 2}, {1, 3}, {2, 4}, {3, 4},
+				{5, 6}, {5, 7}, {6, 8}, {7, 8},
+				{1, 5}, {2, 6}, {3, 7}, {4, 8}
+			}
+			local wire_color = self.config.rainbow and get_rainbow_color() or self.config.box_color
+			for i, edge in ipairs(edges) do
+				local line = obj.drawings.wire_box[i]
+				local start_pos = corners[edge[1]].Position
+				local end_pos = corners[edge[2]].Position
+				if line then
+					local start_screen, start_visible = world_to_screen(start_pos)
+					local end_screen, end_visible = world_to_screen(end_pos)
+					line.Visible = start_visible and end_visible
+					line.From = start_screen
+					line.To = end_screen
+					line.Color = wire_color
+					line.Thickness = 1
+				end
+			end
+		end
+	else
+		if obj.drawings.wire_box then
+			for _, line in ipairs(obj.drawings.wire_box) do
+				line.Visible = false
+			end
+		end
+	end
+
+	local on_screen = true
+	local root_screen, visible = world_to_screen(root.Position)
+	if not visible then
+		on_screen = false
+	end
+
+	if self.config.out_of_view and obj.drawings.arrow then
+		local viewport = camera.ViewportSize
+		local center = Vector2.new(viewport.X / 2, viewport.Y / 2)
+		local to_center = center - Vector2.new(mid_x, (min_pos.Y + max_pos.Y) / 2)
+		local dir = to_center.Unit
+		local radius = math.min(center.X, center.Y) - 24
+		local arrow_pos = center - dir * radius
+		obj.drawings.arrow.Visible = not on_screen
+		obj.drawings.arrow.Color = self.config.rainbow and get_rainbow_color() or self.config.arrow_color
+		obj.drawings.arrow.Filled = true
+		obj.drawings.arrow.Thickness = 1
+		obj.drawings.arrow.PointA = arrow_pos
+		obj.drawings.arrow.PointB = arrow_pos + Vector2.new(-dir.Y, dir.X) * 10
+		obj.drawings.arrow.PointC = arrow_pos + Vector2.new(dir.Y, -dir.X) * 10
+
+		if obj.drawings.arrow_label then
+			local dist = math.floor(get_distance(character))
+			local tool_name = get_tool_name(character)
+			local label_text = string.format("%s [%dm]", player.Name, dist)
+			if self.config.weapon and tool_name ~= "" then
+				label_text = string.format("%s [%dm] - %s", player.Name, dist, tool_name)
+			end
+			obj.drawings.arrow_label.Visible = not on_screen
+			obj.drawings.arrow_label.Text = label_text
+			obj.drawings.arrow_label.Size = self.config.text_size - 2
+			obj.drawings.arrow_label.Color = self.config.text_color
+			obj.drawings.arrow_label.Center = true
+			obj.drawings.arrow_label.Outline = true
+			obj.drawings.arrow_label.Position = arrow_pos + dir * 18
+		end
+	else
+		if obj.drawings.arrow then
+			obj.drawings.arrow.Visible = false
+		end
+		if obj.drawings.arrow_label then
+			obj.drawings.arrow_label.Visible = false
 		end
 	end
 end
@@ -533,6 +890,59 @@ function ElyESP:update_player(player)
 			self:create_highlight(player)
 		end
 		self:update_highlight(player)
+	else
+		if self.objects[player] and self.objects[player].highlight then
+			self.objects[player].highlight.Enabled = false
+		end
+	end
+
+	if not self.config.chams and self.objects[player] and self.objects[player].chams then
+		self.objects[player].chams:Destroy()
+		self.objects[player].chams = nil
+	end
+
+	if not self.config.glow and self.objects[player] and self.objects[player].glow then
+		self.objects[player].glow:Destroy()
+		self.objects[player].glow = nil
+	end
+
+	if not self.config.box_fill_panels and self.objects[player] and self.objects[player].box_panel then
+		self.objects[player].box_panel:Destroy()
+		self.objects[player].box_panel = nil
+	end
+
+	if self.config.chams then
+		if not (self.objects[player] and self.objects[player].chams) then
+			self:create_chams(player)
+		end
+	end
+
+	if self.config.glow then
+		if not (self.objects[player] and self.objects[player].glow) then
+			self:create_glow(player)
+		end
+	end
+
+	if self.config.box_fill_panels then
+		if not (self.objects[player] and self.objects[player].box_panel) then
+			self:create_box_panels(player)
+		end
+	end
+
+	if self.objects[player] and self.objects[player].chams then
+		for _, adorn in ipairs(self.objects[player].chams:GetChildren()) do
+			if adorn:IsA("BoxHandleAdornment") then
+				adorn.Color3 = self.config.rainbow and get_rainbow_color() or self.config.chams_color
+			end
+		end
+	end
+
+	if self.objects[player] and self.objects[player].glow then
+		self.objects[player].glow.OutlineColor = self.config.rainbow and get_rainbow_color() or self.config.chams_color
+	end
+
+	if self.objects[player] and self.objects[player].box_panel then
+		self.objects[player].box_panel.Color3 = self.config.rainbow and get_rainbow_color() or self.config.fill_color
 	end
 
 	if self.config.use_billboard then
@@ -560,8 +970,20 @@ function ElyESP:start()
 			return
 		end
 
+		local now = tick()
+		self.last_update = self.last_update or 0
+		if self.config.update_rate > 0 and now - self.last_update < self.config.update_rate then
+			return
+		end
+		self.last_update = now
+
+		local count = 0
 		for _, player in ipairs(services.players:GetPlayers()) do
+			if self.config.max_players_drawn > 0 and count >= self.config.max_players_drawn then
+				break
+			end
 			self:update_player(player)
+			count += 1
 		end
 	end)
 end
