@@ -1,195 +1,580 @@
--- elysium esp v1
+-- ElyESP Library
 
-local esp = {}
-esp.objects = {}
-esp.settings = {
-	enabled = false,
-	box = true,
-	name = true,
-	health = true,
-	distance = false,
-	max_distance = 3000,
-	color_enemy = Color3.fromRGB(255, 80, 80),
-	color_team = Color3.fromRGB(80, 160, 255),
-	thickness = 1
-}
+local ElyESP = {}
+ElyESP.__index = ElyESP
 
 local services = {
 	players = game:GetService("Players"),
-	run = game:GetService("RunService"),
-	camera = workspace.CurrentCamera
+	run_service = game:GetService("RunService"),
+	workspace = game:GetService("Workspace")
 }
 
 local local_player = services.players.LocalPlayer
+local camera = services.workspace.CurrentCamera
 
-local function new_line()
-	local l = Drawing.new("Line")
-	l.Visible = false
-	l.Thickness = esp.settings.thickness
-	return l
+local defaults = {
+	enabled = true,
+	team_check = false,
+	max_distance = 3000,
+
+	box_2d = true,
+	corner_box = false,
+	box_3d = false,
+	skeleton = false,
+	chams = false,
+	glow = false,
+	highlight = true,
+
+	name = true,
+	health = true,
+	distance = true,
+	weapon = false,
+
+	tracers = false,
+	tracer_from = "bottom",
+	out_of_view = false,
+	arrows = false,
+
+	rainbow = false,
+	use_billboard = false,
+	text_size = 12,
+
+	box_color = Color3.fromRGB(200, 200, 200),
+	corner_color = Color3.fromRGB(200, 200, 200),
+	text_color = Color3.fromRGB(240, 240, 240),
+	tracer_color = Color3.fromRGB(200, 200, 200),
+	arrow_color = Color3.fromRGB(200, 200, 200),
+	chams_color = Color3.fromRGB(200, 200, 200),
+	highlight_fill = Color3.fromRGB(200, 200, 200),
+	highlight_outline = Color3.fromRGB(90, 90, 90),
+	health_color = Color3.fromRGB(90, 220, 110)
+}
+
+local function clamp(value, min_value, max_value)
+	if value < min_value then
+		return min_value
+	end
+	if value > max_value then
+		return max_value
+	end
+	return value
 end
 
-local function new_text()
-	local t = Drawing.new("Text")
-	t.Visible = false
-	t.Size = 13
-	t.Center = true
-	t.Outline = true
-	t.Font = 2
-	return t
+local function get_rainbow_color()
+	local t = tick() * 0.2
+	return Color3.fromHSV(t % 1, 1, 1)
 end
 
-local function get_character(player)
-	return player.Character
-end
-
-local function get_root(char)
-	return char and char:FindFirstChild("HumanoidRootPart")
-end
-
-local function get_humanoid(char)
-	return char and char:FindFirstChildOfClass("Humanoid")
-end
-
-local function on_team(player)
-	if not player.Team or not local_player.Team then
+local function is_alive(player)
+	local character = player.Character
+	if not character then
 		return false
 	end
-	return player.Team == local_player.Team
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	return humanoid and humanoid.Health > 0
 end
 
-function esp.new(player)
-	if player == local_player then return end
+local function get_root(character)
+	return character and character:FindFirstChild("HumanoidRootPart")
+end
 
-	local obj = {
-		player = player,
-		box = {
-			tl = new_line(),
-			tr = new_line(),
-			bl = new_line(),
-			br = new_line()
-		},
-		name = new_text(),
-		health = new_line()
+local function get_distance(character)
+	local root = get_root(character)
+	if not root then
+		return math.huge
+	end
+	return (camera.CFrame.Position - root.Position).Magnitude
+end
+
+local function get_tool_name(character)
+	if not character then
+		return ""
+	end
+	local tool = character:FindFirstChildOfClass("Tool")
+	return tool and tool.Name or ""
+end
+
+local function world_to_screen(position)
+	local point, on_screen = camera:WorldToViewportPoint(position)
+	return Vector2.new(point.X, point.Y), on_screen, point.Z
+end
+
+local function get_character_bounds(character)
+	if not character then
+		return nil
+	end
+	local cf, size = character:GetBoundingBox()
+	local corners = {
+		cf * CFrame.new(size.X / 2, size.Y / 2, size.Z / 2),
+		cf * CFrame.new(-size.X / 2, size.Y / 2, size.Z / 2),
+		cf * CFrame.new(size.X / 2, -size.Y / 2, size.Z / 2),
+		cf * CFrame.new(-size.X / 2, -size.Y / 2, size.Z / 2),
+		cf * CFrame.new(size.X / 2, size.Y / 2, -size.Z / 2),
+		cf * CFrame.new(-size.X / 2, size.Y / 2, -size.Z / 2),
+		cf * CFrame.new(size.X / 2, -size.Y / 2, -size.Z / 2),
+		cf * CFrame.new(-size.X / 2, -size.Y / 2, -size.Z / 2)
+	}
+	return corners
+end
+
+local function get_screen_bounds(character)
+	local corners = get_character_bounds(character)
+	if not corners then
+		return nil
+	end
+
+	local min_x, min_y = math.huge, math.huge
+	local max_x, max_y = -math.huge, -math.huge
+	local on_screen = false
+
+	for _, corner in ipairs(corners) do
+		local screen_pos, visible = world_to_screen(corner.Position)
+		if visible then
+			on_screen = true
+		end
+		min_x = math.min(min_x, screen_pos.X)
+		min_y = math.min(min_y, screen_pos.Y)
+		max_x = math.max(max_x, screen_pos.X)
+		max_y = math.max(max_y, screen_pos.Y)
+	end
+
+	if not on_screen then
+		return nil
+	end
+
+	return Vector2.new(min_x, min_y), Vector2.new(max_x, max_y)
+end
+
+local function create_drawing(draw_type)
+	if not Drawing then
+		return nil
+	end
+	local obj = Drawing.new(draw_type)
+	obj.Visible = false
+	return obj
+end
+
+function ElyESP.new(config)
+	local self = setmetatable({}, ElyESP)
+	self.config = {}
+	for key, value in pairs(defaults) do
+		self.config[key] = value
+	end
+	if config then
+		for key, value in pairs(config) do
+			self.config[key] = value
+		end
+	end
+
+	self.objects = {}
+	self.connection = nil
+
+	return self
+end
+
+function ElyESP:set(key, value)
+	self.config[key] = value
+end
+
+function ElyESP:destroy_player(player)
+	local obj = self.objects[player]
+	if not obj then
+		return
+	end
+
+	for _, item in pairs(obj) do
+		if typeof(item) == "Instance" then
+			item:Destroy()
+		elseif typeof(item) == "table" then
+			for _, sub in pairs(item) do
+				if typeof(sub) == "Instance" then
+					sub:Destroy()
+				elseif sub and sub.Remove then
+					sub:Remove()
+				elseif sub and sub.Destroy then
+					sub:Destroy()
+				end
+			end
+		elseif item and item.Remove then
+			item:Remove()
+		elseif item and item.Destroy then
+			item:Destroy()
+		end
+	end
+
+	self.objects[player] = nil
+end
+
+function ElyESP:create_highlight(player)
+	local character = player.Character
+	if not character then
+		return
+	end
+
+	local highlight = Instance.new("Highlight")
+	highlight.Name = "ElyESP_Highlight"
+	highlight.Adornee = character
+	highlight.FillTransparency = 0.65
+	highlight.OutlineTransparency = 0.2
+	highlight.FillColor = self.config.highlight_fill
+	highlight.OutlineColor = self.config.highlight_outline
+	highlight.Parent = character
+
+	self.objects[player] = self.objects[player] or {}
+	self.objects[player].highlight = highlight
+end
+
+function ElyESP:create_billboard(player)
+	local character = player.Character
+	if not character then
+		return
+	end
+
+	local root = get_root(character)
+	if not root then
+		return
+	end
+
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "ElyESP_Billboard"
+	billboard.Size = UDim2.new(0, 180, 0, 70)
+	billboard.AlwaysOnTop = true
+	billboard.StudsOffset = Vector3.new(0, 2.8, 0)
+	billboard.Parent = character
+
+	local name_label = Instance.new("TextLabel")
+	name_label.Size = UDim2.new(1, 0, 0, 18)
+	name_label.BackgroundTransparency = 1
+	name_label.Font = Enum.Font.GothamBold
+	name_label.TextSize = self.config.text_size
+	name_label.TextColor3 = self.config.text_color
+	name_label.Text = player.Name
+	name_label.Parent = billboard
+
+	local health_label = Instance.new("TextLabel")
+	health_label.Size = UDim2.new(1, 0, 0, 16)
+	health_label.Position = UDim2.new(0, 0, 0, 20)
+	health_label.BackgroundTransparency = 1
+	health_label.Font = Enum.Font.Gotham
+	health_label.TextSize = self.config.text_size - 1
+	health_label.TextColor3 = self.config.text_color
+	health_label.Text = ""
+	health_label.Parent = billboard
+
+	local distance_label = Instance.new("TextLabel")
+	distance_label.Size = UDim2.new(1, 0, 0, 16)
+	distance_label.Position = UDim2.new(0, 0, 0, 38)
+	distance_label.BackgroundTransparency = 1
+	distance_label.Font = Enum.Font.Gotham
+	distance_label.TextSize = self.config.text_size - 1
+	distance_label.TextColor3 = self.config.text_color
+	distance_label.Text = ""
+	distance_label.Parent = billboard
+
+	local weapon_label = Instance.new("TextLabel")
+	weapon_label.Size = UDim2.new(1, 0, 0, 16)
+	weapon_label.Position = UDim2.new(0, 0, 0, 56)
+	weapon_label.BackgroundTransparency = 1
+	weapon_label.Font = Enum.Font.Gotham
+	weapon_label.TextSize = self.config.text_size - 2
+	weapon_label.TextColor3 = self.config.text_color
+	weapon_label.Text = ""
+	weapon_label.Parent = billboard
+
+	self.objects[player] = self.objects[player] or {}
+	self.objects[player].billboard = billboard
+	self.objects[player].billboard_name = name_label
+	self.objects[player].billboard_health = health_label
+	self.objects[player].billboard_distance = distance_label
+	self.objects[player].billboard_weapon = weapon_label
+end
+
+function ElyESP:create_drawings(player)
+	local drawings = {
+		box = create_drawing("Square"),
+		corner = {},
+		tracer = create_drawing("Line"),
+		arrow = create_drawing("Triangle"),
+		name = create_drawing("Text"),
+		health = create_drawing("Line"),
+		distance = create_drawing("Text"),
+		weapon = create_drawing("Text"),
+		skeleton = {}
 	}
 
-	esp.objects[player] = obj
-end
-
-function esp.remove(player)
-	local obj = esp.objects[player]
-	if not obj then return end
-
-	for _, line in pairs(obj.box) do
-		line:Remove()
+	for i = 1, 8 do
+		drawings.corner[i] = create_drawing("Line")
 	end
-	obj.name:Remove()
-	obj.health:Remove()
 
-	esp.objects[player] = nil
+	for i = 1, 15 do
+		drawings.skeleton[i] = create_drawing("Line")
+	end
+
+	self.objects[player] = self.objects[player] or {}
+	self.objects[player].drawings = drawings
 end
 
-function esp.update()
-	if not esp.settings.enabled then
-		for _, obj in pairs(esp.objects) do
-			for _, l in pairs(obj.box) do l.Visible = false end
-			obj.name.Visible = false
-			obj.health.Visible = false
+function ElyESP:update_drawings(player)
+	local obj = self.objects[player]
+	if not obj or not obj.drawings then
+		return
+	end
+
+	local character = player.Character
+	local root = get_root(character)
+	if not root then
+		return
+	end
+
+	local min_pos, max_pos = get_screen_bounds(character)
+	if not min_pos or not max_pos then
+		for _, item in pairs(obj.drawings) do
+			if typeof(item) == "table" then
+				for _, sub in pairs(item) do
+					if sub then
+						sub.Visible = false
+					end
+				end
+			elseif item then
+				item.Visible = false
+			end
 		end
 		return
 	end
 
-	for player, obj in pairs(esp.objects) do
-		local char = get_character(player)
-		local root = get_root(char)
-		local hum = get_humanoid(char)
+	local width = max_pos.X - min_pos.X
+	local height = max_pos.Y - min_pos.Y
+	local mid_x = (min_pos.X + max_pos.X) / 2
+	local color = self.config.rainbow and get_rainbow_color() or self.config.box_color
 
-		if not char or not root or not hum or hum.Health <= 0 then
-			for _, l in pairs(obj.box) do l.Visible = false end
-			obj.name.Visible = false
-			obj.health.Visible = false
-			continue
+	if self.config.box_2d and obj.drawings.box then
+		obj.drawings.box.Visible = true
+		obj.drawings.box.Position = min_pos
+		obj.drawings.box.Size = Vector2.new(width, height)
+		obj.drawings.box.Color = color
+		obj.drawings.box.Thickness = 1
+		obj.drawings.box.Filled = false
+	else
+		if obj.drawings.box then
+			obj.drawings.box.Visible = false
 		end
+	end
 
-		local pos, on_screen = services.camera:WorldToViewportPoint(root.Position)
-		if not on_screen then
-			for _, l in pairs(obj.box) do l.Visible = false end
-			obj.name.Visible = false
-			obj.health.Visible = false
-			continue
+	if self.config.corner_box then
+		local corner_color = self.config.rainbow and get_rainbow_color() or self.config.corner_color
+		local corner_size = math.min(width, height) * 0.2
+		local corners = {
+			{Vector2.new(min_pos.X, min_pos.Y), Vector2.new(min_pos.X + corner_size, min_pos.Y)},
+			{Vector2.new(min_pos.X, min_pos.Y), Vector2.new(min_pos.X, min_pos.Y + corner_size)},
+			{Vector2.new(max_pos.X, min_pos.Y), Vector2.new(max_pos.X - corner_size, min_pos.Y)},
+			{Vector2.new(max_pos.X, min_pos.Y), Vector2.new(max_pos.X, min_pos.Y + corner_size)},
+			{Vector2.new(min_pos.X, max_pos.Y), Vector2.new(min_pos.X + corner_size, max_pos.Y)},
+			{Vector2.new(min_pos.X, max_pos.Y), Vector2.new(min_pos.X, max_pos.Y - corner_size)},
+			{Vector2.new(max_pos.X, max_pos.Y), Vector2.new(max_pos.X - corner_size, max_pos.Y)},
+			{Vector2.new(max_pos.X, max_pos.Y), Vector2.new(max_pos.X, max_pos.Y - corner_size)}
+		}
+
+		for i, line in ipairs(obj.drawings.corner) do
+			local pair = corners[i]
+			line.Visible = true
+			line.From = pair[1]
+			line.To = pair[2]
+			line.Color = corner_color
+			line.Thickness = 1
 		end
-
-		local distance = (services.camera.CFrame.Position - root.Position).Magnitude
-		if distance > esp.settings.max_distance then
-			for _, l in pairs(obj.box) do l.Visible = false end
-			obj.name.Visible = false
-			obj.health.Visible = false
-			continue
+	else
+		for _, line in ipairs(obj.drawings.corner) do
+			line.Visible = false
 		end
+	end
 
-		local scale = math.clamp(1 / distance * 1000, 0.8, 2)
-		local size = Vector2.new(35, 50) * scale
-
-		local tl = Vector2.new(pos.X - size.X, pos.Y - size.Y)
-		local tr = Vector2.new(pos.X + size.X, pos.Y - size.Y)
-		local bl = Vector2.new(pos.X - size.X, pos.Y + size.Y)
-		local br = Vector2.new(pos.X + size.X, pos.Y + size.Y)
-
-		local color = on_team(player)
-			and esp.settings.color_team
-			or esp.settings.color_enemy
-
-		-- box
-		if esp.settings.box then
-			obj.box.tl.From = tl
-			obj.box.tl.To = tr
-
-			obj.box.tr.From = tr
-			obj.box.tr.To = br
-
-			obj.box.br.From = br
-			obj.box.br.To = bl
-
-			obj.box.bl.From = bl
-			obj.box.bl.To = tl
-
-			for _, l in pairs(obj.box) do
-				l.Color = color
-				l.Visible = true
-			end
+	if self.config.tracers and obj.drawings.tracer then
+		local from_y = self.config.tracer_from == "top" and 0 or services.workspace.CurrentCamera.ViewportSize.Y
+		obj.drawings.tracer.Visible = true
+		obj.drawings.tracer.From = Vector2.new(services.workspace.CurrentCamera.ViewportSize.X / 2, from_y)
+		obj.drawings.tracer.To = Vector2.new(mid_x, max_pos.Y)
+		obj.drawings.tracer.Color = self.config.rainbow and get_rainbow_color() or self.config.tracer_color
+		obj.drawings.tracer.Thickness = 1
+	else
+		if obj.drawings.tracer then
+			obj.drawings.tracer.Visible = false
 		end
+	end
 
-		-- name
-		if esp.settings.name then
-			obj.name.Text = player.Name
-			obj.name.Position = Vector2.new(pos.X, tl.Y - 14)
-			obj.name.Color = color
-			obj.name.Visible = true
+	if self.config.name and obj.drawings.name then
+		obj.drawings.name.Visible = true
+		obj.drawings.name.Text = player.Name
+		obj.drawings.name.Size = self.config.text_size
+		obj.drawings.name.Color = self.config.text_color
+		obj.drawings.name.Center = true
+		obj.drawings.name.Outline = true
+		obj.drawings.name.Position = Vector2.new(mid_x, min_pos.Y - 14)
+	else
+		if obj.drawings.name then
+			obj.drawings.name.Visible = false
 		end
+	end
 
-		-- health
-		if esp.settings.health then
-			local hp = hum.Health / hum.MaxHealth
-			obj.health.From = Vector2.new(tl.X - 4, bl.Y)
-			obj.health.To = Vector2.new(tl.X - 4, bl.Y - (bl.Y - tl.Y) * hp)
-			obj.health.Color = Color3.fromRGB(
-				255 - (hp * 255),
-				hp * 255,
-				0
-			)
-			obj.health.Visible = true
+	if self.config.health and obj.drawings.health then
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			local health_percent = clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
+			obj.drawings.health.Visible = true
+			obj.drawings.health.From = Vector2.new(min_pos.X - 4, max_pos.Y)
+			obj.drawings.health.To = Vector2.new(min_pos.X - 4, max_pos.Y - (height * health_percent))
+			obj.drawings.health.Color = self.config.health_color
+			obj.drawings.health.Thickness = 2
+		end
+	else
+		if obj.drawings.health then
+			obj.drawings.health.Visible = false
+		end
+	end
+
+	if self.config.distance and obj.drawings.distance then
+		local dist = math.floor(get_distance(character))
+		obj.drawings.distance.Visible = true
+		obj.drawings.distance.Text = string.format("%dm", dist)
+		obj.drawings.distance.Size = self.config.text_size - 1
+		obj.drawings.distance.Color = self.config.text_color
+		obj.drawings.distance.Center = true
+		obj.drawings.distance.Outline = true
+		obj.drawings.distance.Position = Vector2.new(mid_x, max_pos.Y + 2)
+	else
+		if obj.drawings.distance then
+			obj.drawings.distance.Visible = false
+		end
+	end
+
+	if self.config.weapon and obj.drawings.weapon then
+		obj.drawings.weapon.Visible = true
+		obj.drawings.weapon.Text = get_tool_name(character)
+		obj.drawings.weapon.Size = self.config.text_size - 1
+		obj.drawings.weapon.Color = self.config.text_color
+		obj.drawings.weapon.Center = true
+		obj.drawings.weapon.Outline = true
+		obj.drawings.weapon.Position = Vector2.new(mid_x, max_pos.Y + 14)
+	else
+		if obj.drawings.weapon then
+			obj.drawings.weapon.Visible = false
 		end
 	end
 end
 
--- lifecycle
-for _, p in ipairs(services.players:GetPlayers()) do
-	esp.new(p)
+function ElyESP:update_billboard(player, distance)
+	local obj = self.objects[player]
+	if not obj or not obj.billboard then
+		return
+	end
+
+	obj.billboard_name.Text = player.Name
+	if self.config.health then
+		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			obj.billboard_health.Text = string.format("%d HP", humanoid.Health)
+		end
+	else
+		obj.billboard_health.Text = ""
+	end
+
+	if self.config.distance then
+		obj.billboard_distance.Text = string.format("%dm", distance)
+	else
+		obj.billboard_distance.Text = ""
+	end
+
+	if self.config.weapon then
+		obj.billboard_weapon.Text = get_tool_name(player.Character)
+	else
+		obj.billboard_weapon.Text = ""
+	end
+
+	local color = self.config.rainbow and get_rainbow_color() or self.config.text_color
+	obj.billboard_name.TextColor3 = color
+	obj.billboard_health.TextColor3 = color
+	obj.billboard_distance.TextColor3 = color
+	obj.billboard_weapon.TextColor3 = color
 end
 
-services.players.PlayerAdded:Connect(esp.new)
-services.players.PlayerRemoving:Connect(esp.remove)
+function ElyESP:update_highlight(player)
+	local obj = self.objects[player]
+	if not obj or not obj.highlight then
+		return
+	end
 
-services.run.RenderStepped:Connect(esp.update)
+	local color = self.config.rainbow and get_rainbow_color() or self.config.highlight_fill
+	obj.highlight.FillColor = color
+	obj.highlight.OutlineColor = self.config.highlight_outline
+end
 
-return esp
+function ElyESP:update_player(player)
+	if player == local_player then
+		return
+	end
+
+	if self.config.team_check and player.Team == local_player.Team then
+		self:destroy_player(player)
+		return
+	end
+
+	if not is_alive(player) then
+		self:destroy_player(player)
+		return
+	end
+
+	local distance = get_distance(player.Character)
+	if distance > self.config.max_distance then
+		self:destroy_player(player)
+		return
+	end
+
+	if self.config.highlight then
+		if not (self.objects[player] and self.objects[player].highlight) then
+			self:create_highlight(player)
+		end
+		self:update_highlight(player)
+	end
+
+	if self.config.use_billboard then
+		if not (self.objects[player] and self.objects[player].billboard) then
+			self:create_billboard(player)
+		end
+		self:update_billboard(player, math.floor(distance))
+	end
+
+	if Drawing then
+		if not (self.objects[player] and self.objects[player].drawings) then
+			self:create_drawings(player)
+		end
+		self:update_drawings(player)
+	end
+end
+
+function ElyESP:start()
+	if self.connection then
+		return
+	end
+
+	self.connection = services.run_service.RenderStepped:Connect(function()
+		if not self.config.enabled then
+			return
+		end
+
+		for _, player in ipairs(services.players:GetPlayers()) do
+			self:update_player(player)
+		end
+	end)
+end
+
+function ElyESP:stop()
+	if self.connection then
+		self.connection:Disconnect()
+		self.connection = nil
+	end
+
+	for player in pairs(self.objects) do
+		self:destroy_player(player)
+	end
+end
+
+return ElyESP
