@@ -90,162 +90,82 @@ local Config = {
 }
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- THEME SYSTEM - 6 PREMIUM THEMES
+-- THEME SYSTEM - MONOCHROME FOCUSED
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 local Themes = {
-	Explosive = {
-		Name = "Explosive Pink",
-		Primary = Color3.fromRGB(255, 0, 128),
-		Secondary = Color3.fromRGB(180, 0, 255),
-		Accent = Color3.fromRGB(255, 50, 150),
-		Background = Color3.fromRGB(8, 8, 12),
-		Sidebar = Color3.fromRGB(12, 12, 18),
-		Content = Color3.fromRGB(16, 16, 24),
-		Element = Color3.fromRGB(24, 24, 36),
-		ElementHover = Color3.fromRGB(32, 32, 48),
-		ElementActive = Color3.fromRGB(40, 40, 60),
-		Text = Color3.fromRGB(255, 255, 255),
-		TextDim = Color3.fromRGB(160, 160, 180),
-		TextDark = Color3.fromRGB(100, 100, 120),
-		Success = Color3.fromRGB(76, 175, 80),
-		Warning = Color3.fromRGB(255, 152, 0),
-		Error = Color3.fromRGB(244, 67, 54),
-		Info = Color3.fromRGB(33, 150, 243),
-		Gradient = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 128)),
-			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(180, 0, 255)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 0, 200))
-		})
-	},
-	
-	Midnight = {
-		Name = "Midnight Blue",
-		Primary = Color3.fromRGB(64, 156, 255),
-		Secondary = Color3.fromRGB(41, 98, 255),
-		Accent = Color3.fromRGB(102, 187, 255),
-		Background = Color3.fromRGB(10, 10, 20),
-		Sidebar = Color3.fromRGB(15, 15, 28),
-		Content = Color3.fromRGB(20, 20, 35),
-		Element = Color3.fromRGB(25, 25, 42),
-		ElementHover = Color3.fromRGB(30, 30, 50),
-		ElementActive = Color3.fromRGB(35, 35, 58),
-		Text = Color3.fromRGB(240, 245, 255),
-		TextDim = Color3.fromRGB(170, 180, 200),
-		TextDark = Color3.fromRGB(110, 120, 140),
-		Success = Color3.fromRGB(76, 175, 80),
-		Warning = Color3.fromRGB(255, 193, 7),
-		Error = Color3.fromRGB(244, 67, 54),
-		Info = Color3.fromRGB(33, 150, 243),
-		Gradient = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(64, 156, 255)),
-			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(41, 98, 255)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 70, 200))
-		})
-	},
-	
-	Toxic = {
-		Name = "Toxic Green",
-		Primary = Color3.fromRGB(57, 255, 20),
-		Secondary = Color3.fromRGB(124, 252, 0),
-		Accent = Color3.fromRGB(173, 255, 47),
-		Background = Color3.fromRGB(8, 15, 8),
-		Sidebar = Color3.fromRGB(12, 20, 12),
-		Content = Color3.fromRGB(16, 25, 16),
-		Element = Color3.fromRGB(20, 32, 20),
-		ElementHover = Color3.fromRGB(24, 38, 24),
-		ElementActive = Color3.fromRGB(28, 44, 28),
-		Text = Color3.fromRGB(240, 255, 240),
-		TextDim = Color3.fromRGB(180, 200, 180),
-		TextDark = Color3.fromRGB(120, 140, 120),
-		Success = Color3.fromRGB(76, 175, 80),
-		Warning = Color3.fromRGB(255, 235, 59),
-		Error = Color3.fromRGB(244, 67, 54),
-		Info = Color3.fromRGB(76, 175, 80),
-		Gradient = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(57, 255, 20)),
-			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(124, 252, 0)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 205, 50))
-		})
-	},
-	
-	RedDevil = {
-		Name = "Red Devil",
-		Primary = Color3.fromRGB(255, 30, 30),
-		Secondary = Color3.fromRGB(220, 20, 60),
-		Accent = Color3.fromRGB(255, 69, 0),
-		Background = Color3.fromRGB(15, 8, 8),
-		Sidebar = Color3.fromRGB(20, 12, 12),
-		Content = Color3.fromRGB(25, 16, 16),
-		Element = Color3.fromRGB(32, 20, 20),
-		ElementHover = Color3.fromRGB(38, 24, 24),
-		ElementActive = Color3.fromRGB(44, 28, 28),
-		Text = Color3.fromRGB(255, 240, 240),
-		TextDim = Color3.fromRGB(200, 180, 180),
-		TextDark = Color3.fromRGB(140, 120, 120),
-		Success = Color3.fromRGB(76, 175, 80),
-		Warning = Color3.fromRGB(255, 193, 7),
-		Error = Color3.fromRGB(244, 67, 54),
-		Info = Color3.fromRGB(255, 87, 34),
-		Gradient = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 30, 30)),
-			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 20, 60)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(178, 34, 34))
-		})
-	},
-	
-	Cyberpunk = {
-		Name = "Cyberpunk",
-		Primary = Color3.fromRGB(0, 255, 255),
-		Secondary = Color3.fromRGB(255, 0, 255),
-		Accent = Color3.fromRGB(138, 43, 226),
-		Background = Color3.fromRGB(12, 8, 15),
-		Sidebar = Color3.fromRGB(18, 12, 22),
-		Content = Color3.fromRGB(24, 16, 30),
-		Element = Color3.fromRGB(30, 20, 38),
-		ElementHover = Color3.fromRGB(36, 24, 45),
-		ElementActive = Color3.fromRGB(42, 28, 52),
-		Text = Color3.fromRGB(240, 240, 255),
-		TextDim = Color3.fromRGB(180, 180, 220),
-		TextDark = Color3.fromRGB(120, 120, 160),
-		Success = Color3.fromRGB(0, 255, 127),
-		Warning = Color3.fromRGB(255, 215, 0),
-		Error = Color3.fromRGB(255, 20, 147),
-		Info = Color3.fromRGB(0, 255, 255),
-		Gradient = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 255)),
-			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(138, 43, 226)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 255))
-		})
-	},
-	
-	DarkMode = {
-		Name = "Pure Dark",
+	Ash = {
+		Name = "Ash",
 		Primary = Color3.fromRGB(200, 200, 200),
-		Secondary = Color3.fromRGB(150, 150, 150),
-		Accent = Color3.fromRGB(100, 100, 100),
-		Background = Color3.fromRGB(5, 5, 5),
-		Sidebar = Color3.fromRGB(10, 10, 10),
-		Content = Color3.fromRGB(15, 15, 15),
-		Element = Color3.fromRGB(20, 20, 20),
-		ElementHover = Color3.fromRGB(25, 25, 25),
-		ElementActive = Color3.fromRGB(30, 30, 30),
-		Text = Color3.fromRGB(240, 240, 240),
-		TextDim = Color3.fromRGB(180, 180, 180),
+		Secondary = Color3.fromRGB(170, 170, 170),
+		Accent = Color3.fromRGB(120, 120, 120),
+		Background = Color3.fromRGB(11, 11, 11),
+		Sidebar = Color3.fromRGB(16, 16, 16),
+		Content = Color3.fromRGB(20, 20, 20),
+		Element = Color3.fromRGB(25, 25, 25),
+		ElementHover = Color3.fromRGB(30, 30, 30),
+		ElementActive = Color3.fromRGB(36, 36, 36),
+		Text = Color3.fromRGB(235, 235, 235),
+		TextDim = Color3.fromRGB(175, 175, 175),
 		TextDark = Color3.fromRGB(120, 120, 120),
-		Success = Color3.fromRGB(76, 175, 80),
-		Warning = Color3.fromRGB(255, 193, 7),
-		Error = Color3.fromRGB(244, 67, 54),
-		Info = Color3.fromRGB(158, 158, 158),
+		Success = Color3.fromRGB(120, 185, 120),
+		Warning = Color3.fromRGB(200, 170, 80),
+		Error = Color3.fromRGB(200, 80, 80),
+		Info = Color3.fromRGB(140, 160, 190),
 		Gradient = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 200, 200)),
-			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 150, 150)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 100, 100))
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(145, 145, 145))
+		})
+	},
+	Slate = {
+		Name = "Slate",
+		Primary = Color3.fromRGB(180, 190, 200),
+		Secondary = Color3.fromRGB(150, 160, 170),
+		Accent = Color3.fromRGB(110, 120, 130),
+		Background = Color3.fromRGB(12, 14, 16),
+		Sidebar = Color3.fromRGB(17, 19, 21),
+		Content = Color3.fromRGB(22, 24, 26),
+		Element = Color3.fromRGB(28, 30, 32),
+		ElementHover = Color3.fromRGB(34, 36, 38),
+		ElementActive = Color3.fromRGB(40, 42, 44),
+		Text = Color3.fromRGB(230, 235, 240),
+		TextDim = Color3.fromRGB(175, 182, 190),
+		TextDark = Color3.fromRGB(120, 125, 130),
+		Success = Color3.fromRGB(120, 185, 120),
+		Warning = Color3.fromRGB(200, 170, 80),
+		Error = Color3.fromRGB(200, 80, 80),
+		Info = Color3.fromRGB(150, 170, 200),
+		Gradient = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(180, 190, 200)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(130, 140, 150))
+		})
+	},
+	Mono = {
+		Name = "Mono",
+		Primary = Color3.fromRGB(210, 210, 210),
+		Secondary = Color3.fromRGB(170, 170, 170),
+		Accent = Color3.fromRGB(130, 130, 130),
+		Background = Color3.fromRGB(8, 8, 8),
+		Sidebar = Color3.fromRGB(13, 13, 13),
+		Content = Color3.fromRGB(18, 18, 18),
+		Element = Color3.fromRGB(24, 24, 24),
+		ElementHover = Color3.fromRGB(30, 30, 30),
+		ElementActive = Color3.fromRGB(36, 36, 36),
+		Text = Color3.fromRGB(240, 240, 240),
+		TextDim = Color3.fromRGB(180, 180, 180),
+		TextDark = Color3.fromRGB(125, 125, 125),
+		Success = Color3.fromRGB(120, 185, 120),
+		Warning = Color3.fromRGB(200, 170, 80),
+		Error = Color3.fromRGB(200, 80, 80),
+		Info = Color3.fromRGB(150, 170, 200),
+		Gradient = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(210, 210, 210)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 150, 150))
 		})
 	}
 }
 
-local CurrentTheme = Themes.Explosive
+local CurrentTheme = Themes.Ash
 
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- UTILITY FUNCTIONS
@@ -473,9 +393,8 @@ function Elysium:CreateMainFrame()
 	})
 	
 	Utils:CreateCorner(self.MainFrame, Config.CornerRadius)
-	Utils:CreateStroke(self.MainFrame, CurrentTheme.Primary, 2, 0)
-	Utils:CreateShadow(self.MainFrame, 25, 0.85)
-	Utils:CreateGlow(self.MainFrame, CurrentTheme.Primary, 0.75)
+	Utils:CreateStroke(self.MainFrame, CurrentTheme.Accent, 1, 0.6)
+	Utils:CreateShadow(self.MainFrame, 24, 0.88)
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════════
@@ -493,7 +412,7 @@ function Elysium:CreateHeader()
 	})
 	
 	Utils:CreateCorner(self.Header, Config.CornerRadius)
-	Utils:CreateStroke(self.Header, CurrentTheme.Primary, 1, 0.5)
+	Utils:CreateStroke(self.Header, CurrentTheme.Accent, 1, 0.6)
 	
 	-- Title
 	self.TitleLabel = Utils:Create("TextLabel", {
@@ -510,7 +429,6 @@ function Elysium:CreateHeader()
 		Parent = self.Header
 	})
 	
-	Utils:CreateGradient(self.TitleLabel, CurrentTheme.Gradient)
 	
 	-- Version badge
 	self.VersionBadge = Utils:Create("Frame", {
@@ -524,7 +442,7 @@ function Elysium:CreateHeader()
 	})
 	
 	Utils:CreateCorner(self.VersionBadge, 6)
-	Utils:CreateStroke(self.VersionBadge, CurrentTheme.Primary, 1)
+	Utils:CreateStroke(self.VersionBadge, CurrentTheme.Accent, 1, 0.6)
 	
 	Utils:Create("TextLabel", {
 		Size = UDim2.new(1, 0, 1, 0),
@@ -552,7 +470,7 @@ function Elysium:CreateHeader()
 		Parent = self.Header
 	})
 
-	Utils:CreateStroke(self.MinimizeButton, CurrentTheme.Primary, 1)
+	Utils:CreateStroke(self.MinimizeButton, CurrentTheme.Accent, 1, 0.6)
 	
 	Utils:CreateCorner(self.MinimizeButton, 8)
 	
@@ -575,7 +493,7 @@ function Elysium:CreateHeader()
 		Parent = self.Header
 	})
 
-	Utils:CreateStroke(self.CloseButton, CurrentTheme.Primary, 1)
+	Utils:CreateStroke(self.CloseButton, CurrentTheme.Accent, 1, 0.6)
 	
 	Utils:CreateCorner(self.CloseButton, 8)
 	
@@ -618,7 +536,7 @@ function Elysium:CreateSidebar()
 	})
 	
 	Utils:CreateCorner(self.Sidebar, Config.CornerRadius)
-	Utils:CreateStroke(self.Sidebar, CurrentTheme.Primary, 1, 0.5)
+	Utils:CreateStroke(self.Sidebar, CurrentTheme.Accent, 1, 0.6)
 	
 	-- Tab container
 	self.TabContainer = Utils:Create("ScrollingFrame", {
@@ -628,8 +546,8 @@ function Elysium:CreateSidebar()
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		ScrollBarThickness = 5,
-		ScrollBarImageColor3 = CurrentTheme.Primary,
-		ScrollBarImageTransparency = 0.3,
+		ScrollBarImageColor3 = CurrentTheme.Accent,
+		ScrollBarImageTransparency = 0.4,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		ScrollingDirection = Enum.ScrollingDirection.Y,
@@ -660,7 +578,7 @@ function Elysium:CreateContentArea()
 	})
 	
 	Utils:CreateCorner(self.ContentArea, Config.CornerRadius)
-	Utils:CreateStroke(self.ContentArea, CurrentTheme.Primary, 1, 0.5)
+	Utils:CreateStroke(self.ContentArea, CurrentTheme.Accent, 1, 0.6)
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════════
@@ -856,7 +774,7 @@ function Elysium:AddTab(name, icon)
 		Name = "ActiveBar",
 		Size = UDim2.new(0, 4, 0.7, 0),
 		Position = UDim2.new(0, 0, 0.15, 0),
-		BackgroundColor3 = CurrentTheme.Primary,
+		BackgroundColor3 = CurrentTheme.Accent,
 		BorderSizePixel = 0,
 		Visible = false,
 		ZIndex = 6,
@@ -873,8 +791,8 @@ function Elysium:AddTab(name, icon)
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		ScrollBarThickness = 5,
-		ScrollBarImageColor3 = CurrentTheme.Primary,
-		ScrollBarImageTransparency = 0.3,
+		ScrollBarImageColor3 = CurrentTheme.Accent,
+		ScrollBarImageTransparency = 0.4,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		Visible = false,
@@ -939,10 +857,7 @@ function Elysium:SelectTab(tab)
 			Utils:Tween(self.SelectedTab.IconLabel, {ImageColor3 = CurrentTheme.TextDim}, Config.AnimationSpeed)
 		end
 		
-		-- Remove glow
-		local oldGlow = self.SelectedTab.Button:FindFirstChild("Glow")
-		if oldGlow then oldGlow:Destroy() end
-	end
+		end
 	
 	-- Select new tab
 	self.SelectedTab = tab
@@ -954,8 +869,6 @@ function Elysium:SelectTab(tab)
 		Utils:Tween(tab.IconLabel, {ImageColor3 = CurrentTheme.Primary}, Config.AnimationSpeed)
 	end
 	
-	-- Add glow effect
-	Utils:CreateGlow(tab.Button, CurrentTheme.Primary, 0.6)
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════════
@@ -970,34 +883,29 @@ function Elysium:CreateCategory(parent, name)
 		Parent = parent
 	})
 	
-	-- Left accent bar
 	local accentBar = Utils:Create("Frame", {
-		Size = UDim2.new(0, 5, 0.75, 0),
-		Position = UDim2.new(0, 0, 0.125, 0),
-		BackgroundColor3 = CurrentTheme.Primary,
+		Size = UDim2.new(0, 4, 0.6, 0),
+		Position = UDim2.new(0, 0, 0.2, 0),
+		BackgroundColor3 = CurrentTheme.Accent,
 		BorderSizePixel = 0,
 		ZIndex = 4,
 		Parent = category
 	})
 	
 	Utils:CreateCorner(accentBar, 3)
-	Utils:CreateGlow(accentBar, CurrentTheme.Primary, 0.5)
 	
-	-- Label
 	local label = Utils:Create("TextLabel", {
 		Size = UDim2.new(1, -20, 1, 0),
 		Position = UDim2.fromOffset(18, 0),
 		BackgroundTransparency = 1,
 		Text = name:upper(),
-		Font = Enum.Font.GothamBlack,
-		TextSize = 18,
-		TextColor3 = CurrentTheme.Primary,
+		Font = Enum.Font.GothamBold,
+		TextSize = 16,
+		TextColor3 = CurrentTheme.TextDim,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		ZIndex = 4,
 		Parent = category
 	})
-	
-	Utils:CreateGradient(label, CurrentTheme.Gradient)
 	
 	return category
 end
@@ -1015,7 +923,7 @@ function Elysium:CreateDivider(parent)
 		Parent = parent
 	})
 	
-	Utils:CreateGradient(divider, CurrentTheme.Gradient)
+	Utils:CreateStroke(divider, CurrentTheme.Accent, 1, 0.7)
 	
 	return divider
 end
