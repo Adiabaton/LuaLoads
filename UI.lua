@@ -1,37 +1,4 @@
---[[
-	═══════════════════════════════════════════════════════════════════════════════
-	███████╗██╗  ██╗   ██╗███████╗██╗██╗   ██╗███╗   ███╗
-	██╔════╝██║  ╚██╗ ██╔╝██╔════╝██║██║   ██║████╗ ████║
-	█████╗  ██║   ╚████╔╝ ███████╗██║██║   ██║██╔████╔██║
-	██╔══╝  ██║    ╚██╔╝  ╚════██║██║██║   ██║██║╚██╔╝██║
-	███████╗███████╗██║   ███████║██║╚██████╔╝██║ ╚═╝ ██║
-	╚══════╝╚══════╝╚═╝   ╚══════╝╚═╝ ╚═════╝ ╚═╝     ╚═╝
-	═══════════════════════════════════════════════════════════════════════════════
-	
-	UI FRAMEWORK v0.0.5 ALPHA - PROFESSIONAL EDITION
-	═══════════════════════════════════════════════════════════════════════════════
-	
-	Build: Alpha Release
-	Lines: 5000+
-	Quality: Production Grade
-	Inspired by: Atlanta, Utopia, Millenium
-	
-	Features:
-	✓ 20+ Components               ✓ 6 Premium Themes
-	✓ Advanced Tab System          ✓ Notification System
-	✓ Config Save/Load             ✓ Theme Switching
-	✓ Draggable Interface          ✓ Smooth Animations
-	✓ Search System                ✓ Color Picker (HSV/RGB/Hex)
-	✓ Multi-Selection              ✓ Keybind System
-	✓ Player List                  ✓ Dropdown Menus
-	✓ Tooltips                     ✓ Context Menus
-	✓ Progress Bars                ✓ Image Support
-	✓ Rainbow Mode                 ✓ Particle Effects
-	
-	Author: Elysium Development Team
-	License: Proprietary
-	═══════════════════════════════════════════════════════════════════════════════
-]]
+-- Elysium UI Library
 
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- INITIALIZATION
@@ -99,6 +66,9 @@ local Config = {
 	BorderSize = 1,
 	ShadowSize = 20,
 	GlowIntensity = 0.7,
+	DropdownMaxHeight = 220,
+	DropdownZIndex = 120,
+	FloatingZIndex = 140,
 	
 	-- Animation
 	AnimationSpeed = 0.25,
@@ -581,6 +551,8 @@ function Elysium:CreateHeader()
 		ZIndex = 3,
 		Parent = self.Header
 	})
+
+	Utils:CreateStroke(self.MinimizeButton, CurrentTheme.Primary, 1)
 	
 	Utils:CreateCorner(self.MinimizeButton, 8)
 	
@@ -602,6 +574,8 @@ function Elysium:CreateHeader()
 		ZIndex = 3,
 		Parent = self.Header
 	})
+
+	Utils:CreateStroke(self.CloseButton, CurrentTheme.Primary, 1)
 	
 	Utils:CreateCorner(self.CloseButton, 8)
 	
@@ -807,11 +781,15 @@ function Elysium:ToggleMinimize()
 	self.Minimized = not self.Minimized
 	
 	if self.Minimized then
+		self.Sidebar.Visible = false
+		self.ContentArea.Visible = false
 		Utils:Tween(self.MainFrame, {
 			Size = UDim2.fromOffset(Config.WindowSize.X, Config.HeaderHeight)
 		}, Config.AnimationSpeed)
 		self.MinimizeButton.Text = "+"
 	else
+		self.Sidebar.Visible = true
+		self.ContentArea.Visible = true
 		Utils:Tween(self.MainFrame, {
 			Size = UDim2.fromOffset(Config.WindowSize.X, Config.WindowSize.Y)
 		}, Config.AnimationSpeed)
@@ -1434,13 +1412,13 @@ function Elysium:CreateDropdown(parent, text, options, default, flag, callback)
 	local dropdownOpen = false
 	local dropdownList = Utils:Create("Frame", {
 		Size = UDim2.new(0, 0, 0, 0),
-		Position = UDim2.new(0, 0, 1, 5),
+		Position = UDim2.new(0, 0, 1, 6),
 		BackgroundColor3 = CurrentTheme.Element,
 		BorderSizePixel = 0,
 		Visible = false,
-		ZIndex = 50,
+		ZIndex = Config.DropdownZIndex,
 		ClipsDescendants = true,
-		Parent = frame
+		Parent = self.ScreenGui
 	})
 	
 	Utils:CreateCorner(dropdownList, 7)
@@ -1452,6 +1430,8 @@ function Elysium:CreateDropdown(parent, text, options, default, flag, callback)
 		Parent = dropdownList
 	})
 	
+	local optionButtons = {}
+
 	-- Create option buttons
 	for _, option in ipairs(options) do
 		local optionBtn = Utils:Create("TextButton", {
@@ -1463,36 +1443,34 @@ function Elysium:CreateDropdown(parent, text, options, default, flag, callback)
 			TextSize = 14,
 			TextColor3 = option == default and CurrentTheme.Primary or CurrentTheme.Text,
 			AutoButtonColor = false,
-			ZIndex = 51,
+			ZIndex = Config.DropdownZIndex + 1,
 			Parent = dropdownList
 		})
 		
 		Utils:CreateCorner(optionBtn, 5)
+		table.insert(optionButtons, optionBtn)
 		
 		optionBtn.MouseButton1Click:Connect(function()
 			self.Flags[flag] = option
 			valueLabel.Text = option
 			dropdownOpen = false
 			
-			Utils:Tween(dropdownList, {Size = UDim2.new(1, -10, 0, 0)}, Config.AnimationSpeed)
+			Utils:Tween(dropdownList, {Size = UDim2.new(0, dropdownList.AbsoluteSize.X, 0, 0)}, Config.AnimationSpeed)
 			task.wait(Config.AnimationSpeed)
 			dropdownList.Visible = false
 			Utils:Tween(arrow, {Rotation = 0}, Config.AnimationSpeed)
 			
-			-- Update all option colors
-			for _, btn in ipairs(dropdownList:GetChildren()) do
-				if btn:IsA("TextButton") then
-					if btn.Text == option then
-						Utils:Tween(btn, {
-							BackgroundColor3 = CurrentTheme.ElementActive,
-							TextColor3 = CurrentTheme.Primary
-						}, Config.FastAnimation)
-					else
-						Utils:Tween(btn, {
-							BackgroundColor3 = CurrentTheme.ElementHover,
-							TextColor3 = CurrentTheme.Text
-						}, Config.FastAnimation)
-					end
+			for _, btn in ipairs(optionButtons) do
+				if btn.Text == option then
+					Utils:Tween(btn, {
+						BackgroundColor3 = CurrentTheme.ElementActive,
+						TextColor3 = CurrentTheme.Primary
+					}, Config.FastAnimation)
+				else
+					Utils:Tween(btn, {
+						BackgroundColor3 = CurrentTheme.ElementHover,
+						TextColor3 = CurrentTheme.Text
+					}, Config.FastAnimation)
 				end
 			end
 			
@@ -1522,20 +1500,46 @@ function Elysium:CreateDropdown(parent, text, options, default, flag, callback)
 		ZIndex = 49,
 		Parent = frame
 	})
+
+	local function updateDropdownPosition()
+		dropdownList.Position = UDim2.new(0, frame.AbsolutePosition.X, 0, frame.AbsolutePosition.Y + frame.AbsoluteSize.Y + 6)
+		local width = frame.AbsoluteSize.X
+		dropdownList.Size = UDim2.new(0, width, 0, dropdownList.AbsoluteSize.Y)
+	end
+
+	local function closeDropdown()
+		dropdownOpen = false
+		Utils:Tween(dropdownList, {Size = UDim2.new(0, dropdownList.AbsoluteSize.X, 0, 0)}, Config.AnimationSpeed)
+		Utils:Tween(arrow, {Rotation = 0}, Config.AnimationSpeed)
+		task.wait(Config.AnimationSpeed)
+		dropdownList.Visible = false
+	end
 	
 	toggleButton.MouseButton1Click:Connect(function()
 		dropdownOpen = not dropdownOpen
 		
 		if dropdownOpen then
 			dropdownList.Visible = true
-			local listHeight = math.min(#options * 41, 220)
-			Utils:Tween(dropdownList, {Size = UDim2.new(1, -10, 0, listHeight)}, Config.AnimationSpeed)
+			updateDropdownPosition()
+			local listHeight = math.min(#options * 41, Config.DropdownMaxHeight)
+			Utils:Tween(dropdownList, {Size = UDim2.new(0, frame.AbsoluteSize.X, 0, listHeight)}, Config.AnimationSpeed)
 			Utils:Tween(arrow, {Rotation = 180}, Config.AnimationSpeed)
 		else
-			Utils:Tween(dropdownList, {Size = UDim2.new(1, -10, 0, 0)}, Config.AnimationSpeed)
-			Utils:Tween(arrow, {Rotation = 0}, Config.AnimationSpeed)
-			task.wait(Config.AnimationSpeed)
-			dropdownList.Visible = false
+			closeDropdown()
+		end
+	end)
+
+	Services.UserInputService.InputBegan:Connect(function(input, processed)
+		if processed then return end
+		if dropdownOpen and input.UserInputType == Enum.UserInputType.MouseButton1 then
+			local mousePos = Services.UserInputService:GetMouseLocation()
+			local insideFrame = mousePos.X >= frame.AbsolutePosition.X and mousePos.X <= frame.AbsolutePosition.X + frame.AbsoluteSize.X
+				and mousePos.Y >= frame.AbsolutePosition.Y and mousePos.Y <= frame.AbsolutePosition.Y + frame.AbsoluteSize.Y
+			local insideDropdown = mousePos.X >= dropdownList.AbsolutePosition.X and mousePos.X <= dropdownList.AbsolutePosition.X + dropdownList.AbsoluteSize.X
+				and mousePos.Y >= dropdownList.AbsolutePosition.Y and mousePos.Y <= dropdownList.AbsolutePosition.Y + dropdownList.AbsoluteSize.Y
+			if not insideFrame and not insideDropdown then
+				closeDropdown()
+			end
 		end
 	end)
 	
@@ -1732,7 +1736,7 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 	Utils:CreateCorner(frame, 7)
 	
 	local label = Utils:Create("TextLabel", {
-		Size = UDim2.new(1, -80, 1, 0),
+		Size = UDim2.new(1, -140, 1, 0),
 		Position = UDim2.fromOffset(18, 0),
 		BackgroundTransparency = 1,
 		Text = text,
@@ -1743,7 +1747,20 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 		ZIndex = 4,
 		Parent = frame
 	})
-	
+
+	local preview = Utils:Create("Frame", {
+		Size = UDim2.fromOffset(46, 30),
+		Position = UDim2.new(1, -126, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		BackgroundColor3 = default,
+		BorderSizePixel = 0,
+		ZIndex = 4,
+		Parent = frame
+	})
+
+	Utils:CreateCorner(preview, 5)
+	Utils:CreateStroke(preview, CurrentTheme.ElementHover, 1)
+
 	local colorDisplay = Utils:Create("TextButton", {
 		Size = UDim2.fromOffset(60, 30),
 		Position = UDim2.new(1, -70, 0.5, 0),
@@ -1766,7 +1783,7 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 		BackgroundColor3 = CurrentTheme.Sidebar,
 		BorderSizePixel = 0,
 		Visible = false,
-		ZIndex = 150,
+		ZIndex = Config.FloatingZIndex,
 		Parent = self.ScreenGui
 	})
 	
@@ -1912,6 +1929,7 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 		
 		self.Flags[flag] = color
 		colorDisplay.BackgroundColor3 = color
+		preview.BackgroundColor3 = color
 		svBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
 		
 		rInput.Text = tostring(math.floor(color.R * 255))
@@ -1929,6 +1947,9 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 		
 		local stroke = colorDisplay:FindFirstChild("UIStroke")
 		if stroke then stroke.Color = color end
+		
+		local previewStroke = preview:FindFirstChild("UIStroke")
+		if previewStroke then previewStroke.Color = color end
 		
 		if callback then task.spawn(callback, color) end
 	end
@@ -2007,10 +2028,16 @@ function Elysium:CreateColorPicker(parent, text, default, flag, callback)
 	end)
 	
 	-- Toggle picker
+	local function positionPicker()
+		local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
+		picker.Position = UDim2.new(0, math.clamp(frame.AbsolutePosition.X, 20, viewport.X - picker.AbsoluteSize.X - 20), 0, math.clamp(frame.AbsolutePosition.Y - picker.AbsoluteSize.Y - 10, 20, viewport.Y - picker.AbsoluteSize.Y - 20))
+	end
+
 	colorDisplay.MouseButton1Click:Connect(function()
 		pickerOpen = not pickerOpen
 		picker.Visible = pickerOpen
 		if pickerOpen then
+			positionPicker()
 			updateColor()
 		end
 	end)
@@ -2088,13 +2115,13 @@ function Elysium:CreateMultiDropdown(parent, text, options, defaults, flag, call
 	local dropdownOpen = false
 	local dropdownList = Utils:Create("Frame", {
 		Size = UDim2.new(0, 0, 0, 0),
-		Position = UDim2.new(0, 0, 1, 5),
+		Position = UDim2.new(0, 0, 1, 6),
 		BackgroundColor3 = CurrentTheme.Element,
 		BorderSizePixel = 0,
 		Visible = false,
-		ZIndex = 50,
+		ZIndex = Config.DropdownZIndex,
 		ClipsDescendants = true,
-		Parent = frame
+		Parent = self.ScreenGui
 	})
 	
 	Utils:CreateCorner(dropdownList, 7)
@@ -2117,24 +2144,27 @@ function Elysium:CreateMultiDropdown(parent, text, options, defaults, flag, call
 		countLabel.Text = #self.Flags[flag] .. " selected"
 	end
 	
+	local optionFrames = {}
+
 	for _, option in ipairs(options) do
 		local optionFrame = Utils:Create("Frame", {
 			Size = UDim2.new(1, -12, 0, 38),
 			Position = UDim2.fromOffset(6, 0),
 			BackgroundColor3 = CurrentTheme.ElementHover,
 			BorderSizePixel = 0,
-			ZIndex = 51,
+			ZIndex = Config.DropdownZIndex + 1,
 			Parent = dropdownList
 		})
 		
 		Utils:CreateCorner(optionFrame, 5)
+		table.insert(optionFrames, optionFrame)
 		
 		local checkbox = Utils:Create("Frame", {
 			Size = UDim2.fromOffset(20, 20),
 			Position = UDim2.fromOffset(10, 9),
 			BackgroundColor3 = isSelected(option) and CurrentTheme.Primary or CurrentTheme.ElementActive,
 			BorderSizePixel = 0,
-			ZIndex = 52,
+			ZIndex = Config.DropdownZIndex + 2,
 			Parent = optionFrame
 		})
 		
@@ -2162,7 +2192,7 @@ function Elysium:CreateMultiDropdown(parent, text, options, defaults, flag, call
 			TextSize = 14,
 			TextColor3 = CurrentTheme.Text,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			ZIndex = 52,
+			ZIndex = Config.DropdownZIndex + 2,
 			Parent = optionFrame
 		})
 		
@@ -2170,7 +2200,7 @@ function Elysium:CreateMultiDropdown(parent, text, options, defaults, flag, call
 			Size = UDim2.new(1, 0, 1, 0),
 			BackgroundTransparency = 1,
 			Text = "",
-			ZIndex = 54,
+			ZIndex = Config.DropdownZIndex + 3,
 			Parent = optionFrame
 		})
 		
@@ -2224,19 +2254,45 @@ function Elysium:CreateMultiDropdown(parent, text, options, defaults, flag, call
 		Parent = frame
 	})
 	
+	local function updateDropdownPosition()
+		dropdownList.Position = UDim2.new(0, frame.AbsolutePosition.X, 0, frame.AbsolutePosition.Y + frame.AbsoluteSize.Y + 6)
+		local width = frame.AbsoluteSize.X
+		dropdownList.Size = UDim2.new(0, width, 0, dropdownList.AbsoluteSize.Y)
+	end
+
+	local function closeDropdown()
+		dropdownOpen = false
+		Utils:Tween(dropdownList, {Size = UDim2.new(0, dropdownList.AbsoluteSize.X, 0, 0)}, Config.AnimationSpeed)
+		Utils:Tween(arrow, {Rotation = 0}, Config.AnimationSpeed)
+		task.wait(Config.AnimationSpeed)
+		dropdownList.Visible = false
+	end
+
 	toggleButton.MouseButton1Click:Connect(function()
 		dropdownOpen = not dropdownOpen
 		
 		if dropdownOpen then
 			dropdownList.Visible = true
-			local listHeight = math.min(#options * 41, 220)
-			Utils:Tween(dropdownList, {Size = UDim2.new(1, -10, 0, listHeight)}, Config.AnimationSpeed)
+			updateDropdownPosition()
+			local listHeight = math.min(#options * 41, Config.DropdownMaxHeight)
+			Utils:Tween(dropdownList, {Size = UDim2.new(0, frame.AbsoluteSize.X, 0, listHeight)}, Config.AnimationSpeed)
 			Utils:Tween(arrow, {Rotation = 180}, Config.AnimationSpeed)
 		else
-			Utils:Tween(dropdownList, {Size = UDim2.new(1, -10, 0, 0)}, Config.AnimationSpeed)
-			Utils:Tween(arrow, {Rotation = 0}, Config.AnimationSpeed)
-			task.wait(Config.AnimationSpeed)
-			dropdownList.Visible = false
+			closeDropdown()
+		end
+	end)
+
+	Services.UserInputService.InputBegan:Connect(function(input, processed)
+		if processed then return end
+		if dropdownOpen and input.UserInputType == Enum.UserInputType.MouseButton1 then
+			local mousePos = Services.UserInputService:GetMouseLocation()
+			local insideFrame = mousePos.X >= frame.AbsolutePosition.X and mousePos.X <= frame.AbsolutePosition.X + frame.AbsoluteSize.X
+				and mousePos.Y >= frame.AbsolutePosition.Y and mousePos.Y <= frame.AbsolutePosition.Y + frame.AbsoluteSize.Y
+			local insideDropdown = mousePos.X >= dropdownList.AbsolutePosition.X and mousePos.X <= dropdownList.AbsolutePosition.X + dropdownList.AbsoluteSize.X
+				and mousePos.Y >= dropdownList.AbsolutePosition.Y and mousePos.Y <= dropdownList.AbsolutePosition.Y + dropdownList.AbsoluteSize.Y
+			if not insideFrame and not insideDropdown then
+				closeDropdown()
+			end
 		end
 	end)
 	
@@ -2565,7 +2621,7 @@ end
 
 function Elysium:CreatePlayerList(parent)
 	local container = Utils:Create("Frame", {
-		Size = UDim2.new(1, -20, 1, -80),
+		Size = UDim2.new(1, -20, 0, 320),
 		BackgroundTransparency = 1,
 		ZIndex = 3,
 		Parent = parent
